@@ -1,21 +1,19 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-import Hero from '../components/Hero';
-import SuccessSection from '../components/SuccessSection';
-import FeaturesGrid from '../components/FeaturesGrid';
-import InfoSection from '../components/InfoSection';
-import ToolsSection from '../components/ToolsSection';
+import HomeHero from '../components/HomeHero';
+import HomeCategories from '../components/HomeCategories';
+import HomeFeatured from '../components/HomeFeatured';
+import HomeMarketing from '../components/HomeMarketing';
 import Footer from '../components/Footer';
 
 const Home = () => {
     return (
         <div>
             <Navbar />
-            <Hero />
-            <SuccessSection />
-            <FeaturesGrid />
-            <InfoSection />
-            <ToolsSection />
+            <HomeHero />
+            <HomeCategories />
+            <HomeFeatured />
+            <HomeMarketing />
             <Footer />
         </div>
     );

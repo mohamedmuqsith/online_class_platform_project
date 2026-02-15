@@ -20,6 +20,7 @@ body {
   background-color: #ffffff;
   color: var(--text-dark);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 h1,
@@ -39,7 +40,6 @@ a {
 
 ul {
   list-style: none;
-  /* Already defined, reinforcing */
 }
 
 button {
@@ -47,6 +47,11 @@ button {
   border: none;
   outline: none;
   font-family: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 .container {
@@ -61,7 +66,6 @@ button {
   color: var(--text-light);
   padding: 10px 24px;
   border-radius: 25px;
-  /* Pill shape */
   font-weight: 500;
   transition: background-color 0.3s ease;
   font-size: 1rem;
@@ -114,24 +118,183 @@ button {
   margin-top: 1rem;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
+/* ======================== */
+/* MOBILE RESPONSIVE STYLES */
+/* ======================== */
+
+/* Tablet: 769px – 1024px */
+@media (max-width: 1024px) {
   .container {
-    padding: 0 15px;
+    padding: 0 16px;
   }
 
   h1 {
-    font-size: 2.5rem !important;
-    /* Override inline styles */
+    font-size: 2.4rem !important;
   }
 
-  /* Components: Hero */
-  section.container.flex {
-    flex-direction: column-reverse;
-    /* Text on bottom, image on top? or standard column */
-    padding-top: 20px !important;
+  h2 {
+    font-size: 1.8rem !important;
+  }
+}
+
+/* Mobile: up to 768px */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 12px;
   }
 
-  /* Helper class for mobile flex column stacks */
-  /* We will need to update Hero.jsx to use this class or inline style override */
+  h1 {
+    font-size: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.2rem !important;
+  }
+
+  /* HomeHero responsive */
+  .home-hero-flex {
+    flex-direction: column !important;
+    gap: 30px !important;
+    padding: 0 15px !important;
+  }
+
+  .home-hero-text {
+    min-width: unset !important;
+  }
+
+  .home-hero-text h1 {
+    font-size: 2rem !important;
+  }
+
+  .home-hero-text p br {
+    display: none;
+  }
+
+  .home-hero-img-wrap {
+    min-width: unset !important;
+  }
+
+  .home-hero-img-box {
+    max-width: 100% !important;
+    height: 300px !important;
+    border-radius: 30px !important;
+  }
+
+  /* HomeCategories responsive */
+  .categories-grid {
+    gap: 15px !important;
+    justify-content: center !important;
+  }
+
+  .category-card {
+    flex: 1 1 140px !important;
+    max-width: 48% !important;
+    padding: 12px !important;
+    border-radius: 20px !important;
+  }
+
+  /* HomeFeatured responsive */
+  .featured-grid {
+    flex-direction: column !important;
+    gap: 25px !important;
+  }
+
+  .featured-card {
+    min-width: unset !important;
+    padding: 20px !important;
+    border-radius: 30px !important;
+  }
+
+  .featured-card-img {
+    height: 180px !important;
+    border-radius: 15px !important;
+  }
+
+  /* HomeMarketing responsive */
+  .marketing-grid {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  .marketing-card {
+    min-width: unset !important;
+  }
+
+  /* Blog Hero responsive */
+  .blog-hero-section {
+    height: 300px !important;
+  }
+
+  /* BlogPostContent responsive */
+  .blog-tags-wrap {
+    gap: 10px !important;
+  }
+
+  .blog-tags-wrap span {
+    padding: 8px 18px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .blog-content-body {
+    font-size: 0.95rem !important;
+  }
+
+  /* RelatedBlog responsive */
+  .related-blog-grid {
+    flex-direction: column !important;
+    gap: 25px !important;
+  }
+
+  .related-blog-card {
+    min-width: unset !important;
+    padding: 20px !important;
+    border-radius: 20px !important;
+  }
+
+  .related-blog-card-img {
+    height: 180px !important;
+    border-radius: 15px !important;
+  }
+
+  /* Footer responsive */
+  .footer-links {
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+
+  .footer-subscribe {
+    flex-direction: column !important;
+    border-radius: 15px !important;
+  }
+
+  .footer-subscribe input {
+    text-align: center;
+  }
+}
+
+/* Small mobile: up to 480px */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.6rem !important;
+  }
+
+  h2 {
+    font-size: 1.3rem !important;
+  }
+
+  .home-hero-img-box {
+    height: 220px !important;
+  }
+
+  .category-card {
+    max-width: 100% !important;
+  }
+
+  .featured-card {
+    padding: 15px !important;
+  }
 }

@@ -4,19 +4,19 @@ import relatedBlogImg from '../assets/Related Blog.png';
 const RelatedBlog = () => {
     return (
         <section className="container" style={{ padding: '80px 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px', flexWrap: 'wrap', gap: '10px' }}>
                 <h2 style={{ fontSize: '2.2rem', fontFamily: 'serif', color: '#333' }}>Related Blog</h2>
                 <a href="#" style={{ color: '#c49696', fontWeight: 'bold', fontSize: '1.2rem', textDecoration: 'none' }}>See all</a>
             </div>
-            <div className="flex" style={{ gap: '40px', flexWrap: 'wrap' }}>
+            <div className="flex related-blog-grid" style={{ gap: '40px', flexWrap: 'wrap' }}>
                 {[1, 2].map((i) => (
-                    <div key={i} style={{
+                    <div key={i} className="related-blog-card" style={{
                         flex: 1, minWidth: '350px', background: '#fff',
                         borderRadius: '40px', padding: '40px', position: 'relative',
                         boxShadow: '0 10px 40px rgba(0,0,0,0.05)',
                         border: '1px solid #f0f0f0'
                     }}>
-                        <div style={{
+                        <div className="related-blog-card-img" style={{
                             width: '100%', height: '250px', background: '#f5f5f5',
                             borderRadius: '25px', marginBottom: '25px', overflow: 'hidden'
                         }}>

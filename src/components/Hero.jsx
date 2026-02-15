@@ -71,13 +71,14 @@ const Hero = () => {
                         EduFlex is an interesting platform that will teach you in more an interactive way
                     </p>
                     <button className="btn-outline" style={{
-                        borderRadius: '25px',
-                        padding: '12px 35px',
-                        borderColor: '#c49696',
-                        color: '#c49696',
-                        borderWidth: '2px',
+                        borderRadius: '30px',
+                        padding: '12px 40px',
+                        borderColor: '#ebdcdc',
+                        color: '#333',
+                        borderWidth: '1.5px',
                         fontSize: '1rem',
-                        background: 'rgba(255,255,255,0.8)'
+                        background: '#fff',
+                        fontWeight: '600'
                     }}>
                         Join for free
                     </button>
@@ -87,26 +88,26 @@ const Hero = () => {
                 {/* Card 1: Congratulations */}
                 <div className="floating-card" style={{
                     position: 'absolute',
-                    top: '30%',
+                    top: '35%',
                     left: '50%',
-                    transform: 'translateX(-20%)',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '10px 20px',
+                    transform: 'translateX(-15%)',
+                    background: '#fff',
+                    padding: '8px 25px',
                     borderRadius: '50px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                     fontSize: '0.8rem',
                     display: 'flex',
-                    gap: '10px',
+                    gap: '12px',
                     alignItems: 'center',
                     zIndex: 2,
-                    minWidth: '220px'
+                    minWidth: '240px'
                 }}>
-                    <div style={{ background: '#000', borderRadius: '50%', padding: '5px', display: 'flex' }}>
-                        <span style={{ fontSize: '12px' }}>💬</span>
+                    <div style={{ background: '#333', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid #fff', marginLeft: '2px' }}></div>
                     </div>
                     <div>
-                        <div style={{ fontWeight: 'bold', fontSize: '10px' }}>Congratulations Your</div>
-                        <div style={{ fontSize: '10px', color: '#666' }}>Admission completed</div>
+                        <div style={{ fontWeight: '800', fontSize: '11px', color: '#333' }}>Congratulations Your</div>
+                        <div style={{ fontSize: '10px', color: '#888' }}>Admission completed</div>
                     </div>
                 </div>
 
@@ -115,20 +116,20 @@ const Hero = () => {
                     position: 'absolute',
                     bottom: '25%',
                     right: '25%',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '10px 20px',
+                    background: '#fff',
+                    padding: '12px 25px',
                     borderRadius: '15px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                    fontSize: '0.8rem',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+                    fontSize: '0.9rem',
                     display: 'flex',
-                    gap: '10px',
+                    gap: '12px',
                     alignItems: 'center',
                     zIndex: 2
                 }}>
-                    <div style={{ background: '#333', color: '#fff', borderRadius: '5px', padding: '5px 8px' }}>
-                        📅
+                    <div style={{ background: '#1a0d3d', color: '#fff', borderRadius: '5px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
+                        📊
                     </div>
-                    <span>250K assisted Student</span>
+                    <span style={{ fontWeight: '700', color: '#333' }}>250K assisted Student</span>
                 </div>
 
                 {/* User Code */}
@@ -136,8 +137,8 @@ const Hero = () => {
                     position: 'absolute',
                     bottom: '20%',
                     right: '15%',
-                    fontWeight: 'bold',
-                    fontSize: '0.9rem',
+                    fontWeight: '800',
+                    fontSize: '0.95rem',
                     color: '#333',
                     zIndex: 2
                 }}>
