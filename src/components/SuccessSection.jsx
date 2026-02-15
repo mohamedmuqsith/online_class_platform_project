@@ -19,6 +19,26 @@ const SuccessSection = () => {
                     We believe in building a future where technology and human insight work in perfect harmony.
                 </p>
             </div>
+
+            {/* Stats Counter */}
+            <div className="flex justify-between items-center" style={{ margin: '60px 0', textAlign: 'center', flexWrap: 'wrap', gap: '30px' }}>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                    <h3 style={{ fontSize: '3rem', color: '#c49696', fontFamily: 'serif', marginBottom: '5px' }}>15 K</h3>
+                    <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Students</p>
+                </div>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                    <h3 style={{ fontSize: '3rem', color: '#c49696', fontFamily: 'serif', marginBottom: '5px' }}>80%</h3>
+                    <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Total Success</p>
+                </div>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                    <h3 style={{ fontSize: '3rem', color: '#c49696', fontFamily: 'serif', marginBottom: '5px' }}>26</h3>
+                    <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Chief Experts</p>
+                </div>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                    <h3 style={{ fontSize: '3rem', color: '#c49696', fontFamily: 'serif', marginBottom: '5px' }}>13</h3>
+                    <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Years Of Experience</p>
+                </div>
+            </div>
         </section>
     );
 };

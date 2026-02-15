@@ -5,7 +5,6 @@ import AuthForm from '../components/AuthForm';
 const Signup = () => {
     return (
         <div>
-            <Navbar />
             <AuthForm />
         </div>
     );

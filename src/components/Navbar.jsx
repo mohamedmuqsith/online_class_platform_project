@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../index.css';
 
+import logoImg from '../assets/logo.png';
+
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -10,19 +12,16 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="container" style={{ padding: '25px 0', position: 'relative' }}>
+        <nav className="container" style={{ padding: '5px 0', position: 'relative' }}>
             <div className="flex justify-between items-center" style={{ width: '100%' }}>
 
                 {/* Logo / Brand Name */}
-                <Link to="/" style={{
-                    fontWeight: '800',
-                    fontSize: '1.8rem',
-                    fontFamily: 'var(--font-heading)',
-                    color: '#333',
-                    letterSpacing: '-0.5px',
-                    textDecoration: 'none'
-                }}>
-                    EduFlex
+                <Link to="/">
+                    <img
+                        src={logoImg}
+                        alt="EduFlex Logo"
+                        style={{ maxWidth: '120px', height: 'auto' }}
+                    />
                 </Link>
 
                 {/* Desktop Menu */}
@@ -41,7 +40,7 @@ const Navbar = () => {
                         font-weight: 500;
                         color: #666;
                         transition: color 0.3s ease;
-                        font-size: 1.05rem;
+                        font-size: 0.95rem;
                       }
                       .nav-link:hover {
                         color: var(--primary-color);
@@ -56,8 +55,8 @@ const Navbar = () => {
                     </ul>
                     <Link to="/login" className="btn-primary" style={{
                         textDecoration: 'none',
-                        padding: '12px 32px',
-                        fontSize: '1.05rem',
+                        padding: '8px 24px',
+                        fontSize: '0.95rem',
                         fontWeight: '700',
                         boxShadow: '0 4px 14px rgba(196, 150, 150, 0.4)',
                         transform: 'translateY(0)',

@@ -5,7 +5,6 @@ import AuthForm from '../components/AuthForm';
 const Login = () => {
     return (
         <div>
-            <Navbar />
             <AuthForm />
         </div>
     );
