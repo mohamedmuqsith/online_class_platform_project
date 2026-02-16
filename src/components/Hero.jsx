@@ -70,16 +70,21 @@ const Hero = () => {
                     <p style={{ marginBottom: '30px', color: '#555', fontSize: '1.1rem', maxWidth: '400px' }}>
                         EduFlex is an interesting platform that will teach you in more an interactive way
                     </p>
-                    <button className="btn-outline" style={{
-                        borderRadius: '30px',
-                        padding: '12px 40px',
-                        borderColor: '#ebdcdc',
-                        color: '#333',
-                        borderWidth: '1.5px',
-                        fontSize: '1rem',
-                        background: '#fff',
-                        fontWeight: '600'
-                    }}>
+                    <button
+                        className="btn-outline"
+                        onClick={() => window.location.href = '/search'}
+                        style={{
+                            borderRadius: '30px',
+                            padding: '12px 40px',
+                            borderColor: '#ebdcdc',
+                            color: '#333',
+                            borderWidth: '1.5px',
+                            fontSize: '1rem',
+                            background: '#fff',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                        }}
+                    >
                         Join for free
                     </button>
                 </div>

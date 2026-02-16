@@ -26,9 +26,9 @@ const InfoSection = () => {
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                     </div>
-                    <button className="btn-outline" style={{
+                    <button className="btn-outline" onClick={() => window.location.href = '/courses'} style={{
                         position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
-                        background: '#fff', padding: '10px 30px'
+                        background: '#fff', padding: '10px 30px', cursor: 'pointer'
                     }}>
                         For Instructors ➝
                     </button>
@@ -45,9 +45,9 @@ const InfoSection = () => {
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                     </div>
-                    <button className="btn-outline" style={{
+                    <button className="btn-outline" onClick={() => window.location.href = '/search'} style={{
                         position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
-                        background: '#fff', padding: '10px 30px', borderColor: '#888', color: '#555'
+                        background: '#fff', padding: '10px 30px', borderColor: '#888', color: '#555', cursor: 'pointer'
                     }}>
                         For Students ➝
                     </button>

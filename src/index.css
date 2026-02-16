@@ -276,6 +276,25 @@ img {
   }
 }
 
+/* Membership & Course pages responsive — Tablet */
+@media (max-width: 1024px) {
+  .pricing-grid {
+    gap: 20px !important;
+  }
+
+  .pricing-card {
+    min-width: 220px !important;
+  }
+
+  .course-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .course-cat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 /* Small mobile: up to 480px */
 @media (max-width: 480px) {
   h1 {
@@ -296,5 +315,49 @@ img {
 
   .featured-card {
     padding: 15px !important;
+  }
+
+  /* Membership & Course — small mobile */
+  .pricing-grid {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .pricing-card {
+    max-width: 100% !important;
+    min-width: unset !important;
+  }
+
+  .pricing-card.featured {
+    transform: none !important;
+  }
+
+  .faq-question {
+    font-size: 0.85rem !important;
+    padding: 14px 16px !important;
+  }
+
+  .course-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .course-cat-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .course-hero-header {
+    flex-direction: column !important;
+    gap: 10px !important;
+    text-align: center !important;
+  }
+
+  .lesson-card {
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .testimonial-card {
+    min-width: 100% !important;
+    max-width: 100% !important;
   }
 }

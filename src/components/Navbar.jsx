@@ -173,9 +173,11 @@ const Navbar = () => {
                     <ul className="flex items-center" style={{ listStyle: 'none', gap: '35px', margin: 0, padding: 0 }}>
                         <li><Link to="/home" className="nav-link">Home</Link></li>
                         <li><Link to="/courses" className="nav-link">Courses</Link></li>
-                        <li><Link to="/careers" className="nav-link">Careers</Link></li>
+                        <li><Link to="/course-calendar" className="nav-link">Dashboard</Link></li>
+                        <li><Link to="/meetings" className="nav-link">Meetings</Link></li>
+                        <li><Link to="/membership" className="nav-link">Membership</Link></li>
                         <li><Link to="/blog" className="nav-link">Blog</Link></li>
-                        <li><Link to="/about" className="nav-link">About us</Link></li>
+                        <li><Link to="/contact" className="nav-link">Contact</Link></li>
                     </ul>
                     <Link to="/login" className="btn-primary" style={{
                         textDecoration: 'none',
@@ -216,9 +218,12 @@ const Navbar = () => {
                 <div className="mobile-menu-overlay">
                     <Link to="/home" onClick={toggleMenu} className="mobile-nav-link">Home</Link>
                     <Link to="/courses" onClick={toggleMenu} className="mobile-nav-link">Courses</Link>
-                    <Link to="/careers" onClick={toggleMenu} className="mobile-nav-link">Careers</Link>
+                    <Link to="/course-calendar" onClick={toggleMenu} className="mobile-nav-link">Dashboard / Calendar</Link>
+                    <Link to="/meetings" onClick={toggleMenu} className="mobile-nav-link">Live Meetings</Link>
+                    <Link to="/create-event" onClick={toggleMenu} className="mobile-nav-link">Create Event</Link>
+                    <Link to="/membership" onClick={toggleMenu} className="mobile-nav-link">Membership</Link>
                     <Link to="/blog" onClick={toggleMenu} className="mobile-nav-link">Blog</Link>
-                    <Link to="/about" onClick={toggleMenu} className="mobile-nav-link">About us</Link>
+                    <Link to="/contact" onClick={toggleMenu} className="mobile-nav-link">Contact</Link>
                     <Link to="/login" onClick={toggleMenu} className="btn-primary mobile-login-btn" style={{
                         textDecoration: 'none',
                         fontSize: '1.2rem',

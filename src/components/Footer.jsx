@@ -51,9 +51,11 @@ const Footer = () => {
                     display: 'flex', justifyContent: 'center', gap: '40px', fontSize: '0.9rem',
                     flexWrap: 'wrap'
                 }}>
+                    <Link to="/home" style={{ color: '#fff', opacity: 0.8 }}>Home</Link>
+                    <Link to="/courses" style={{ color: '#fff', opacity: 0.8 }}>Courses</Link>
                     <Link to="/contact" style={{ color: '#fff', opacity: 0.8 }}>Contact</Link>
-                    <Link to="/privacy" style={{ color: '#fff', opacity: 0.8 }}>Privacy Policy</Link>
-                    <Link to="/terms" style={{ color: '#fff', opacity: 0.8 }}>Terms & Conditions</Link>
+                    <Link to="/membership" style={{ color: '#fff', opacity: 0.8 }}>Membership</Link>
+                    <Link to="/search" style={{ color: '#fff', opacity: 0.8 }}>Search</Link>
                 </div>
 
             </div>
