@@ -74,6 +74,4 @@ The platform uses a mobile-first design strategy. Media queries are defined in `
 - **Tablet**: 768px to 1024px
 - **Mobile**: Up to 768px
 
----
 
-*This project was developed as part of the Fuchius Mentorship Program.*
