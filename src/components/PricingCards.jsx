@@ -188,7 +188,7 @@ const PricingCards = () => {
                         </ul>
                         <button
                             className={`pricing-btn ${plan.featured ? 'filled' : 'outline'}`}
-                            onClick={() => window.location.href = '/payment'}
+                            onClick={() => window.location.href = '/payment-gateway'}
                         >
                             {plan.btnText}
                         </button>

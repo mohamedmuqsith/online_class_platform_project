@@ -12,7 +12,7 @@ const MarketingArticles = () => {
         <section className="container" style={{ padding: '80px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                 <h2 style={{ fontSize: '1.8rem', fontFamily: 'serif', color: '#333' }}>Marketing Articles</h2>
-                <a href="#" style={{ color: '#c49696', fontWeight: 'bold', textDecoration: 'none' }}>See all</a>
+                <a href="/courses" style={{ color: '#c49696', fontWeight: 'bold', textDecoration: 'none' }}>See all</a>
             </div>
             <div className="flex" style={{ gap: '25px', flexWrap: 'wrap' }}>
                 {articles.map((art, index) => (

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logoImg from '../assets/logo.png';
 
 const Footer = () => {
     return (
@@ -9,7 +10,7 @@ const Footer = () => {
                 {/* Logo in Footer */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '40px' }}>
                     <div style={{ background: '#fff', padding: '10px', borderRadius: '10px' }}>
-                        <img src="/src/assets/logo.png" alt="Logo" style={{ width: '40px', height: 'auto' }} onError={(e) => e.target.style.display = 'none'} />
+                        <img src={logoImg} alt="Logo" style={{ width: '40px', height: 'auto' }} onError={(e) => e.target.style.display = 'none'} />
                     </div>
                     <div style={{ textAlign: 'left' }}>
                         <h4 style={{ margin: 0, fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>EDUFLEX</h4>
@@ -55,6 +56,7 @@ const Footer = () => {
                     <Link to="/courses" style={{ color: '#fff', opacity: 0.8 }}>Courses</Link>
                     <Link to="/contact" style={{ color: '#fff', opacity: 0.8 }}>Contact</Link>
                     <Link to="/membership" style={{ color: '#fff', opacity: 0.8 }}>Membership</Link>
+                    <Link to="/certificate" style={{ color: '#fff', opacity: 0.8 }}>Certificates</Link>
                     <Link to="/search" style={{ color: '#fff', opacity: 0.8 }}>Search</Link>
                 </div>
 

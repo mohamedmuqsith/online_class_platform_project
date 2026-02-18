@@ -1,11 +1,69 @@
 import React, { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import '../index.css';
 import logoImg from '../assets/logo.png';
 
 const AuthForm = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const isSignup = location.pathname === '/signup';
+
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+
+        /* ---------- basic validation ---------- */
+        if (!email.trim()) { setError('Please enter your email.'); return; }
+        if (!password.trim()) { setError('Please enter your password.'); return; }
+        if (isSignup && !username.trim()) { setError('Please enter a user name.'); return; }
+
+        setLoading(true);
+
+        /* simulate a short network delay */
+        setTimeout(() => {
+            if (isSignup) {
+                /* ---- REGISTER ---- */
+                const user = { email, username, password, registeredAt: new Date().toISOString() };
+                localStorage.setItem('eduflex_user', JSON.stringify(user));
+                localStorage.setItem('eduflex_logged_in', 'true');
+                navigate('/home');
+            } else {
+                /* ---- LOGIN ---- */
+                const saved = localStorage.getItem('eduflex_user');
+                if (!saved) {
+                    setLoading(false);
+                    setError('No account found. Please sign up first.');
+                    return;
+                }
+
+                const user = JSON.parse(saved);
+
+                /* Strictly check email and password */
+                if (user.email !== email) {
+                    setLoading(false);
+                    setError('No account found with this email.');
+                    return;
+                }
+
+                if (user.password !== password) {
+                    setLoading(false);
+                    setError('Incorrect password. Please try again.');
+                    return;
+                }
+
+                /* Credentials match */
+                localStorage.setItem('eduflex_logged_in', 'true');
+                navigate('/home');
+            }
+            setLoading(false);
+        }, 600);
+    };
 
     return (
         <div style={{
@@ -41,6 +99,16 @@ const AuthForm = () => {
                     max-width: 1200px;
                     z-index: 1;
                 }
+                .auth-error {
+                    background: #ffe0e0;
+                    color: #c44;
+                    padding: 10px 16px;
+                    border-radius: 12px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    margin-bottom: 16px;
+                    text-align: center;
+                }
             `}</style>
 
             {/* Blobs */}
@@ -57,7 +125,6 @@ const AuthForm = () => {
                         alt="EduFlex Logo"
                         style={{ maxWidth: '250px', height: 'auto', display: 'block' }}
                     />
-                    {/* Fallback Text if logo missing */}
                     <div style={{ display: 'none', fontFamily: 'var(--font-heading)', fontSize: '3rem', fontWeight: 'bold', color: '#000' }}>
                         EDUFLEX <br /> <span style={{ fontSize: '1rem', letterSpacing: '5px', textTransform: 'uppercase' }}>Education</span>
                     </div>
@@ -96,36 +163,64 @@ const AuthForm = () => {
                         Welcome to EduFlex..
                     </h2>
 
-                    <form className="flex flex-col gap-4" style={{ textAlign: 'left' }}>
+                    {error && <div className="auth-error">{error}</div>}
+
+                    <form className="flex flex-col gap-4" style={{ textAlign: 'left' }} onSubmit={handleSubmit}>
+                        {/* Email — shown on BOTH login and signup */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>Email</label>
+                            <input
+                                type="email"
+                                placeholder="Enter Your Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                style={{
+                                    width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
+                                }}
+                            />
+                        </div>
+
+                        {/* Username — only on signup */}
                         {isSignup && (
                             <div>
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>Email</label>
-                                <input type="email" placeholder="Enter Your Email" style={{
-                                    width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
-                                }} />
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>User Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Your User name"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    style={{
+                                        width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
+                                    }}
+                                />
                             </div>
                         )}
 
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>User Name</label>
-                            <input type="text" placeholder="Enter Your User name" style={{
-                                width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
-                            }} />
-                        </div>
-
+                        {/* Password */}
                         <div>
                             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>Password</label>
-                            <input type="password" placeholder="Enter Password" style={{
-                                width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
-                            }} />
+                            <input
+                                type="password"
+                                placeholder="Enter Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                style={{
+                                    width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
+                                }}
+                            />
                         </div>
 
-                        <button type="submit" style={{
-                            marginTop: '20px', background: '#c49696', color: '#fff',
-                            padding: '15px', borderRadius: '25px', fontSize: '1.1rem', fontWeight: 'bold',
-                            alignSelf: 'center', width: '50%'
-                        }}>
-                            {isSignup ? 'Sign up' : 'Login'}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                marginTop: '20px', background: loading ? '#d4b0b0' : '#c49696', color: '#fff',
+                                padding: '15px', borderRadius: '25px', fontSize: '1.1rem', fontWeight: 'bold',
+                                alignSelf: 'center', width: '50%', cursor: loading ? 'wait' : 'pointer',
+                                transition: 'background 0.3s', border: 'none'
+                            }}
+                        >
+                            {loading ? '...' : (isSignup ? 'Sign up' : 'Login')}
                         </button>
                     </form>
 

@@ -13,7 +13,7 @@ const HomeMarketing = () => {
         <section className="container" style={{ padding: '80px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px', flexWrap: 'wrap', gap: '10px' }}>
                 <h2 style={{ fontSize: '2.2rem', fontFamily: 'serif', color: '#333' }}>Marketing Articles</h2>
-                <a href="#" style={{ color: '#c49696', fontWeight: 'bold', fontSize: '1.1rem' }}>See all</a>
+                <a href="/courses" style={{ color: '#c49696', fontWeight: 'bold', fontSize: '1.1rem' }}>See all</a>
             </div>
             <div className="flex marketing-grid" style={{ gap: '25px', flexWrap: 'wrap' }}>
                 {articles.map((art, i) => (

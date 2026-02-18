@@ -5,7 +5,7 @@ const BlogPostContent = () => {
         <section className="container" style={{ padding: '60px 0', background: '#ebdcdc', borderRadius: '0 0 50px 50px', marginTop: '-30px', position: 'relative', zIndex: 1 }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
                 <div className="blog-tags-wrap" style={{ display: 'flex', gap: '15px', marginBottom: '40px', flexWrap: 'wrap' }}>
-                    {['Overview', 'Overview', 'Overview', 'Overview'].map((tag, i) => (
+                    {['Overview', 'Technology', 'Mobile Dev', 'SwiftUI'].map((tag, i) => (
                         <span key={i} style={{
                             padding: '10px 30px', borderRadius: '12px',
                             background: i === 2 ? '#c49696' : (i === 3 ? '#a87c7c' : '#d1c1c1'),

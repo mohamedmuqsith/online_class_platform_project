@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
-const tabs = ['Overview', 'Overview', 'Overview', 'Overview'];
+const tabs = ['Overview', 'Curriculum', 'Instructor', 'Reviews'];
 
 const marketingCourses = [
     {
@@ -593,7 +593,7 @@ const CourseDetails = () => {
                             <div className="cd-time-left">11 hour left at this price</div>
                             <button
                                 className="cd-buy-btn"
-                                onClick={() => window.location.href = '/payment'}
+                                onClick={() => window.location.href = '/payment-gateway'}
                             >
                                 Buy Now
                             </button>

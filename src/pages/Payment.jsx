@@ -357,7 +357,7 @@ const Payment = () => {
                         <h3 className="summary-title">Summary</h3>
 
                         <div className="summary-item">
-                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100" className="summary-item-img" />
+                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100" className="summary-item-img" alt="Course thumbnail" />
                             <div className="summary-item-text">
                                 <div className="summary-item-title">adipisising elit, sed do eiusmod</div>
                                 <div className="summary-item-desc">Lorem ipsum dollar...</div>
@@ -366,7 +366,7 @@ const Payment = () => {
                         </div>
 
                         <div className="summary-item">
-                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100" className="summary-item-img" />
+                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100" className="summary-item-img" alt="Course thumbnail" />
                             <div className="summary-item-text">
                                 <div className="summary-item-title">sed do eiusmod tempor</div>
                                 <div className="summary-item-desc">Lorem ipsum dollar...</div>

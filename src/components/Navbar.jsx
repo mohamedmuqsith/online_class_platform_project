@@ -1,14 +1,33 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../index.css';
 
 import logoImg from '../assets/logo.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userName, setUserName] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const loggedIn = localStorage.getItem('eduflex_logged_in') === 'true';
+        setIsLoggedIn(loggedIn);
+        if (loggedIn) {
+            const user = JSON.parse(localStorage.getItem('eduflex_user') || '{}');
+            setUserName(user.username || user.email?.split('@')[0] || 'User');
+        }
+    }, []);
 
     const toggleMenu = () => {
         setIsOpen(!isOpen);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('eduflex_logged_in');
+        setIsLoggedIn(false);
+        setUserName('');
+        navigate('/login');
     };
 
     return (
@@ -176,20 +195,45 @@ const Navbar = () => {
                         <li><Link to="/course-calendar" className="nav-link">Dashboard</Link></li>
                         <li><Link to="/meetings" className="nav-link">Meetings</Link></li>
                         <li><Link to="/membership" className="nav-link">Membership</Link></li>
+                        <li><Link to="/certificate" className="nav-link">Certificates</Link></li>
                         <li><Link to="/blog" className="nav-link">Blog</Link></li>
                         <li><Link to="/contact" className="nav-link">Contact</Link></li>
                     </ul>
-                    <Link to="/login" className="btn-primary" style={{
-                        textDecoration: 'none',
-                        padding: '10px 32px',
-                        fontSize: '0.95rem',
-                        fontWeight: '700',
-                        borderRadius: '30px',
-                        boxShadow: '0 8px 24px rgba(196, 150, 150, 0.3)',
-                        transition: 'all 0.3s ease'
-                    }}>
-                        Login
-                    </Link>
+                    {isLoggedIn ? (
+                        <>
+                            <Link to="/profile" style={{
+                                display: 'flex', alignItems: 'center', gap: '10px',
+                                textDecoration: 'none', color: '#333'
+                            }}>
+                                <div style={{
+                                    width: '38px', height: '38px', borderRadius: '50%',
+                                    background: '#c49696', display: 'flex', alignItems: 'center',
+                                    justifyContent: 'center', color: '#fff', fontWeight: '700',
+                                    fontSize: '0.95rem', boxShadow: '0 4px 12px rgba(196,150,150,0.3)',
+                                    transition: 'transform 0.3s'
+                                }}>
+                                    {userName.charAt(0).toUpperCase()}
+                                </div>
+                                <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{userName}</span>
+                            </Link>
+                            <button onClick={handleLogout} className="btn-primary" style={{
+                                padding: '8px 20px', fontSize: '0.85rem', background: '#333', color: '#fff',
+                                borderRadius: '25px', border: 'none', cursor: 'pointer', transition: 'all 0.3s'
+                            }}>Logout</button>
+                        </>
+                    ) : (
+                        <Link to="/login" className="btn-primary" style={{
+                            textDecoration: 'none',
+                            padding: '10px 32px',
+                            fontSize: '0.95rem',
+                            fontWeight: '700',
+                            borderRadius: '30px',
+                            boxShadow: '0 8px 24px rgba(196, 150, 150, 0.3)',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            Login
+                        </Link>
+                    )}
                 </div>
 
                 {/* Hamburger Toggle */}
@@ -222,17 +266,28 @@ const Navbar = () => {
                     <Link to="/meetings" onClick={toggleMenu} className="mobile-nav-link">Live Meetings</Link>
                     <Link to="/create-event" onClick={toggleMenu} className="mobile-nav-link">Create Event</Link>
                     <Link to="/membership" onClick={toggleMenu} className="mobile-nav-link">Membership</Link>
+                    <Link to="/certificate" onClick={toggleMenu} className="mobile-nav-link">Certificates</Link>
                     <Link to="/blog" onClick={toggleMenu} className="mobile-nav-link">Blog</Link>
                     <Link to="/contact" onClick={toggleMenu} className="mobile-nav-link">Contact</Link>
-                    <Link to="/login" onClick={toggleMenu} className="btn-primary mobile-login-btn" style={{
-                        textDecoration: 'none',
-                        fontSize: '1.2rem',
-                        padding: '14px 50px',
-                        borderRadius: '30px',
-                        boxShadow: '0 8px 24px rgba(196, 150, 150, 0.3)'
-                    }}>
-                        Login
-                    </Link>
+                    {isLoggedIn ? (
+                        <>
+                            <Link to="/profile" onClick={toggleMenu} className="mobile-nav-link">My Profile</Link>
+                            <button onClick={() => { toggleMenu(); handleLogout(); }} className="btn-primary mobile-login-btn" style={{
+                                textDecoration: 'none', fontSize: '1.2rem', padding: '14px 50px',
+                                borderRadius: '30px', boxShadow: '0 8px 24px rgba(196, 150, 150, 0.3)',
+                                border: 'none', cursor: 'pointer', background: '#c49696', color: '#fff'
+                            }}>
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <Link to="/login" onClick={toggleMenu} className="btn-primary mobile-login-btn" style={{
+                            textDecoration: 'none', fontSize: '1.2rem', padding: '14px 50px',
+                            borderRadius: '30px', boxShadow: '0 8px 24px rgba(196, 150, 150, 0.3)'
+                        }}>
+                            Login
+                        </Link>
+                    )}
                 </div>
             )}
 

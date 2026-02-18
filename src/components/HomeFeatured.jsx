@@ -28,7 +28,7 @@ const HomeFeatured = () => {
                             Class, launched less than a year ago by Blackboard co-founder Michael Chasen, integrates exclusively...
                         </p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <a href="#" style={{ color: '#333', fontWeight: 'bold', textDecoration: 'underline', fontSize: '1.1rem' }}>Read more</a>
+                            <a href="/blog" style={{ color: '#333', fontWeight: 'bold', textDecoration: 'underline', fontSize: '1.1rem' }}>Read more</a>
                             <span style={{ color: '#666', fontSize: '1.1rem' }}>👁️ 251,232</span>
                         </div>
                     </div>

@@ -6,7 +6,7 @@ const RelatedBlog = () => {
         <section className="container" style={{ padding: '80px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px', flexWrap: 'wrap', gap: '10px' }}>
                 <h2 style={{ fontSize: '2.2rem', fontFamily: 'serif', color: '#333' }}>Related Blog</h2>
-                <a href="#" style={{ color: '#c49696', fontWeight: 'bold', fontSize: '1.2rem', textDecoration: 'none' }}>See all</a>
+                <a href="/blog" style={{ color: '#c49696', fontWeight: 'bold', fontSize: '1.2rem', textDecoration: 'none' }}>See all</a>
             </div>
             <div className="flex related-blog-grid" style={{ gap: '40px', flexWrap: 'wrap' }}>
                 {[1, 2].map((i) => (
@@ -39,7 +39,7 @@ const RelatedBlog = () => {
                             Class, launched less than a year ago by Blackboard co-founder Michael Chasen, integrates exclusively...
                         </p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <a href="#" style={{ color: '#c49696', fontWeight: 'bold', textDecoration: 'underline', fontSize: '1.1rem' }}>Read more</a>
+                            <a href="/blog" style={{ color: '#c49696', fontWeight: 'bold', textDecoration: 'underline', fontSize: '1.1rem' }}>Read more</a>
                             <span style={{ color: '#999', fontSize: '1rem' }}>👁️ 251,232</span>
                         </div>
                     </div>
