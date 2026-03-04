@@ -1,5 +1,6 @@
     import React, { useState } from 'react';
 import logoImg from '../../assets/logo.png';
+import { eventsAPI } from '../../api';
 
 /* Lesson list data */
 const changeLessons = [
@@ -35,13 +36,40 @@ const CourseCalendarCreate = () => {
         eventDescription: '',
     });
 
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert('Calendar event saved successfully!');
+        setLoading(true);
+        try {
+            await eventsAPI.create({
+                eventName: formData.eventName,
+                startDate: formData.startDate,
+                endDate: formData.endDate,
+                location: formData.location,
+                notification: formData.notification,
+                email: formData.email,
+                description: formData.eventDescription,
+            });
+            alert('Calendar event saved successfully!');
+            setFormData({
+                eventName: '',
+                startDate: '',
+                endDate: '',
+                location: '',
+                notification: '30 mins',
+                email: '',
+                eventDescription: '',
+            });
+        } catch (err) {
+            alert(err.message || 'Failed to save event');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

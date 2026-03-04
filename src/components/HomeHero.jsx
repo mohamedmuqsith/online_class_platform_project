@@ -1,21 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import aiImg from '../assets/Ai.png';
 
 const HomeHero = () => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const navigate = useNavigate();
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+        }
+    };
     return (
         <section className="container" style={{ padding: '60px 0', background: '#e3d6d6', borderRadius: '40px', marginTop: '30px' }}>
             <div className="flex items-center home-hero-flex" style={{ gap: '50px', flexWrap: 'wrap', padding: '0 40px' }}>
                 <div className="home-hero-text" style={{ flex: 1, minWidth: '350px' }}>
-                    <div style={{ position: 'relative', marginBottom: '50px', maxWidth: '500px' }}>
+                    <form onSubmit={handleSearch} style={{ position: 'relative', marginBottom: '50px', maxWidth: '500px' }}>
                         <input
                             type="text"
                             placeholder="Search your favourite course"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             style={{ width: '100%', padding: '18px 30px', borderRadius: '40px', border: 'none', outline: 'none', fontSize: '1.1rem' }}
                         />
-                        <button style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#c49696', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '35px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        <button type="submit" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#c49696', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '35px', cursor: 'pointer', fontWeight: 'bold' }}>
                             Search
                         </button>
-                    </div>
+                    </form>
                     <h1 style={{ fontSize: '3.5rem', fontFamily: 'serif', color: '#333', marginBottom: '30px', lineHeight: '1.1' }}>
                         Advanced Data Science <br /> & AI Course
                     </h1>
@@ -25,7 +37,10 @@ const HomeHero = () => {
                     <div style={{ marginBottom: '40px', fontWeight: '500', color: '#333', fontSize: '1.4rem' }}>
                         Live Interactive Classes
                     </div>
-                    <button style={{ background: '#c49696', color: '#fff', border: 'none', padding: '18px 50px', borderRadius: '40px', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
+                    <button
+                        onClick={() => navigate('/courses')}
+                        style={{ background: '#c49696', color: '#fff', border: 'none', padding: '18px 50px', borderRadius: '40px', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 10px 20px rgba(0,0,0,0.1)', cursor: 'pointer' }}
+                    >
                         Start learning now
                     </button>
                 </div>

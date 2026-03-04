@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import '../index.css';
 import logoImg from '../assets/logo.png';
+import { authAPI } from '../api';
 
 const AuthForm = () => {
     const location = useLocation();
@@ -14,7 +15,7 @@ const AuthForm = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -25,44 +26,39 @@ const AuthForm = () => {
 
         setLoading(true);
 
-        /* simulate a short network delay */
-        setTimeout(() => {
+        try {
+            let data;
             if (isSignup) {
                 /* ---- REGISTER ---- */
-                const user = { email, username, password, registeredAt: new Date().toISOString() };
-                localStorage.setItem('eduflex_user', JSON.stringify(user));
-                localStorage.setItem('eduflex_logged_in', 'true');
-                navigate('/home');
+                data = await authAPI.register(email.trim(), username.trim(), password);
             } else {
                 /* ---- LOGIN ---- */
-                const saved = localStorage.getItem('eduflex_user');
-                if (!saved) {
-                    setLoading(false);
-                    setError('No account found. Please sign up first.');
-                    return;
-                }
+                data = await authAPI.login(email.trim(), password);
+            }
 
-                const user = JSON.parse(saved);
+            localStorage.setItem('eduflex_token', data.token);
+            localStorage.setItem('eduflex_user', JSON.stringify(data.user));
+            localStorage.setItem('eduflex_logged_in', 'true');
 
-                /* Strictly check email and password */
-                if (user.email !== email) {
-                    setLoading(false);
-                    setError('No account found with this email.');
-                    return;
-                }
+            // Fetch full user profile after auth (login returns minimal data)
+            try {
+                const fullUser = await authAPI.getUser();
+                localStorage.setItem('eduflex_user', JSON.stringify(fullUser));
+            } catch (profileErr) {
+                console.warn('Could not fetch full profile, using basic auth data');
+            }
 
-                if (user.password !== password) {
-                    setLoading(false);
-                    setError('Incorrect password. Please try again.');
-                    return;
-                }
-
-                /* Credentials match */
-                localStorage.setItem('eduflex_logged_in', 'true');
+            // Navigate based on role
+            if (data.user.role === 'admin') {
+                navigate('/admin');
+            } else {
                 navigate('/home');
             }
+        } catch (err) {
+            setError(err.message || 'Something went wrong. Please try again.');
+        } finally {
             setLoading(false);
-        }, 600);
+        }
     };
 
     return (

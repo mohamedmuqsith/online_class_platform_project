@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { coursesAPI, authAPI } from '../api';
 
 const tabs = ['Overview', 'Curriculum', 'Instructor', 'Reviews'];
 
@@ -57,6 +59,50 @@ const ratingBars = [
 
 const CourseDetails = () => {
     const [activeTab, setActiveTab] = useState(2);
+    const [course, setCourse] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const location = useLocation();
+
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const queryParams = new URLSearchParams(location.search);
+                const id = queryParams.get('id');
+                if (id) {
+                    const data = await coursesAPI.getById(id);
+                    setCourse(data);
+
+                    // Check if is favorite
+                    try {
+                        const user = await authAPI.getUser();
+                        if (user && user.favorites) {
+                            setIsFavorite(user.favorites.includes(id));
+                        }
+                    } catch (e) { /* Not logged in or error */ }
+                }
+            } catch (err) {
+                console.error('Failed to fetch course details:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourse();
+    }, [location.search]);
+
+    const handleToggleFavorite = async () => {
+        if (!course) return;
+        try {
+            await authAPI.toggleFavorite(course._id);
+            setIsFavorite(!isFavorite);
+        } catch (err) {
+            alert(err.message || 'Please login to favorite courses');
+        }
+    };
+
+    if (loading) return <div style={{ textAlign: 'center', padding: '100px' }}>Loading...</div>;
+    if (!course) return <div style={{ textAlign: 'center', padding: '100px' }}>Course not found</div>;
 
     return (
         <div>
@@ -506,8 +552,8 @@ const CourseDetails = () => {
 
             {/* Hero Banner */}
             <img
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=400&fit=crop"
-                alt="Course Banner"
+                src={course.image || "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=400&fit=crop"}
+                alt={course.title}
                 className="cd-hero-banner"
             />
 
@@ -554,20 +600,32 @@ const CourseDetails = () => {
                     <div className="cd-instructor">
                         <div className="cd-instructor-avatar">👩</div>
                         <div>
-                            <div className="cd-instructor-name">Lina</div>
+                            <div className="cd-instructor-name">{course.instructor?.username || 'Admin'}</div>
                         </div>
                         <div style={{ marginLeft: 'auto' }}>
-                            <span className="cd-instructor-duration">3 Month</span>
+                            <span className="cd-instructor-duration">1 Month</span>
                         </div>
                     </div>
 
                     {/* Description */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2.5rem', margin: 0 }}>{course.title}</h1>
+                        <button
+                            onClick={handleToggleFavorite}
+                            style={{
+                                background: 'transparent', border: 'none', fontSize: '2rem',
+                                cursor: 'pointer', color: isFavorite ? '#e53935' : '#ccc',
+                                transition: 'all 0.3s'
+                            }}
+                        >
+                            {isFavorite ? '❤️' : '🤍'}
+                        </button>
+                    </div>
                     <p className="cd-description">
-                        Class, launched less than a year ago by Blackboard co-founder Michael Chasen, integrated exclusively..
+                        📚 {course.category}
                     </p>
                     <p className="cd-desc-body">
-                        Class, launched less than a year ago by Blackboard co-founder Michael
-                        Chasen, integrated exclusively..
+                        {course.description}
                     </p>
                 </div>
 
@@ -575,7 +633,7 @@ const CourseDetails = () => {
                 <div className="cd-right">
                     <div className="cd-pricing-card">
                         <img
-                            src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=200&fit=crop"
+                            src={course.image || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=200&fit=crop"}
                             alt="Course Preview"
                             className="cd-pricing-img"
                         />
@@ -587,13 +645,13 @@ const CourseDetails = () => {
                         </div>
                         <div className="cd-pricing-body">
                             <div className="cd-price-row">
-                                <span className="cd-price">$49.65</span>
+                                <span className="cd-price">${course.price}</span>
                                 <span className="cd-discount">50% Off</span>
                             </div>
-                            <div className="cd-time-left">11 hour left at this price</div>
+                            <div className="cd-time-left">Limited time offer</div>
                             <button
                                 className="cd-buy-btn"
-                                onClick={() => window.location.href = '/payment-gateway'}
+                                onClick={() => window.location.href = `/payment-gateway?id=${course._id}`}
                             >
                                 Buy Now
                             </button>

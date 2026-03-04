@@ -1,47 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import logoImg from '../assets/logo.png';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
-
-/* Sample data */
-const userCourses = [
-    { title: 'Mobile App Development', status: 'continue' },
-    { title: 'Java Programming', status: 'continue' },
-    { title: 'Project Management', status: 'complete' },
-    { title: 'React', status: 'complete' },
-    { title: 'UI/UX Design Fundamentals', status: 'continue' },
-];
-
-const upcomingSchedule = [
-    { color: '#c49696', title: 'UI/UI Design Presentation', desc: 'Make and do wireframe file with your design process front-end Find notes.' },
-    { color: '#e53935', title: 'Weekend Prototype Submit', desc: 'Make and do wireframe file with your design process front-end Find notes.' },
-    { color: '#e53935', title: 'Beetcoral Hackathon', desc: 'Make and do wireframe file with your design process front-end Find notes.' },
-];
+import { authAPI, onlineClassesAPI, certificatesAPI } from '../api';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState({ username: 'User', email: 'user@email.com', address: 'N/A', contact: 'N/A' });
+
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [upcomingClasses, setUpcomingClasses] = useState([]);
+    const [certificates, setCertificates] = useState([]);
 
     useEffect(() => {
-        const saved = localStorage.getItem('eduflex_user');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            setUser({
-                username: parsed.username || parsed.email?.split('@')[0] || 'User',
-                email: parsed.email || 'user@email.com',
-                address: parsed.address || 'N/A',
-                contact: parsed.contact || 'N/A',
-            });
-        }
+        const fetchData = async () => {
+            try {
+                const userData = await authAPI.getUser();
+                setUser(userData);
+
+                const classesData = await onlineClassesAPI.getAll();
+                setUpcomingClasses(classesData.slice(0, 3)); // Show top 3
+
+                const certsData = await certificatesAPI.getAll();
+                setCertificates(certsData);
+            } catch (err) {
+                console.error('Failed to fetch dashboard data:', err);
+                // Fallback to local storage if API fails but we have basic user info
+                const saved = localStorage.getItem('eduflex_user');
+                if (saved) setUser(JSON.parse(saved));
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('eduflex_logged_in');
-        localStorage.removeItem('eduflex_user');
+        localStorage.clear();
         navigate('/login');
     };
+
+    if (loading) return <div style={{ textAlign: 'center', padding: '100px' }}>Loading Dashboard...</div>;
+    if (!user) return <div style={{ textAlign: 'center', padding: '100px' }}>Please login to view profile</div>;
+
+    const enrolledCourses = user.enrolledCourses || [];
+    const completedCourses = certificates.length;
+    const totalCourses = enrolledCourses.length;
+    const progressPercent = totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0;
+    const stats = {
+        courses: totalCourses,
+        ongoing: totalCourses - completedCourses,
+        certificates: certificates.length,
+        discussion: 0
+    };
+    const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'N/A';
 
     return (
         <div className="pp-wrapper">
@@ -378,35 +390,42 @@ const ProfilePage = () => {
                             <svg className="pp-circle-svg" viewBox="0 0 120 120">
                                 <circle cx="60" cy="60" r="50" fill="none" stroke="#f0e0e0" strokeWidth="10" />
                                 <circle cx="60" cy="60" r="50" fill="none" stroke="#c49696" strokeWidth="10"
-                                    strokeDasharray={`${0.63 * 314} ${314}`}
+                                    strokeDasharray={`${(progressPercent / 100) * 314} ${314}`}
                                     strokeDashoffset="0"
                                     strokeLinecap="round"
                                     transform="rotate(-90 60 60)"
                                 />
-                                <text x="60" y="58" textAnchor="middle" fontSize="22" fontWeight="800" fill="#333">63%</text>
+                                <text x="60" y="58" textAnchor="middle" fontSize="22" fontWeight="800" fill="#333">{progressPercent}%</text>
                                 <text x="60" y="75" textAnchor="middle" fontSize="8" fill="#999">Course Done</text>
                             </svg>
                             <div className="pp-progress-stats">
-                                <div className="pp-stat-row"><span>courses</span> <strong>14</strong></div>
-                                <div className="pp-stat-row"><span>Ongoing Courses</span> <strong>64</strong></div>
-                                <div className="pp-stat-row"><span>Certificates</span> <strong>4</strong></div>
-                                <div className="pp-stat-row"><span>Discussion</span> <strong>12</strong></div>
+                                <div className="pp-stat-row"><span>Courses</span> <strong>{stats.courses}</strong></div>
+                                <div className="pp-stat-row"><span>Ongoing</span> <strong>{stats.ongoing}</strong></div>
+                                <div className="pp-stat-row"><span>Certificates</span> <strong>{stats.certificates}</strong></div>
+                                <div className="pp-stat-row"><span>Discussion</span> <strong>{stats.discussion}</strong></div>
                             </div>
                         </div>
                     </div>
 
                     {/* User Card */}
                     <div className="pp-user-card">
-                        <div className="pp-user-avatar">👩‍🎓</div>
+                        <div className="pp-user-avatar">
+                            {user.profileImage ? <img src={user.profileImage} alt={user.username} /> : '👩‍🎓'}
+                        </div>
                         <h2 className="pp-user-name">{user.username}</h2>
+                        {user.bio && <p style={{ fontSize: '0.8rem', color: '#777', marginBottom: '14px', fontStyle: 'italic' }}>{user.bio}</p>}
                         <div className="pp-user-info">
                             <div className="pp-info-row">
                                 <span className="pp-info-label">Member</span>
-                                <span className="pp-info-value">Gold</span>
+                                <span className="pp-info-value">{user.membership || 'Free'}</span>
+                            </div>
+                            <div className="pp-info-row">
+                                <span className="pp-info-label">Since</span>
+                                <span className="pp-info-value">{memberSince}</span>
                             </div>
                             <div className="pp-info-row">
                                 <span className="pp-info-label">Address</span>
-                                <span className="pp-info-value">{user.address}</span>
+                                <span className="pp-info-value">{user.address || 'Not set'}</span>
                             </div>
                             <div className="pp-info-row">
                                 <span className="pp-info-label">E-mail</span>
@@ -414,8 +433,20 @@ const ProfilePage = () => {
                             </div>
                             <div className="pp-info-row">
                                 <span className="pp-info-label">Contact</span>
-                                <span className="pp-info-value">{user.contact}</span>
+                                <span className="pp-info-value">{user.contact || 'Not set'}</span>
                             </div>
+                            {user.gender && (
+                                <div className="pp-info-row">
+                                    <span className="pp-info-label">Gender</span>
+                                    <span className="pp-info-value" style={{ textTransform: 'capitalize' }}>{user.gender}</span>
+                                </div>
+                            )}
+                            {user.dateOfBirth && (
+                                <div className="pp-info-row">
+                                    <span className="pp-info-label">DOB</span>
+                                    <span className="pp-info-value">{new Date(user.dateOfBirth).toLocaleDateString()}</span>
+                                </div>
+                            )}
                         </div>
                         <Link to="/edit-profile" className="pp-edit-btn">Edit Profile</Link>
                     </div>
@@ -427,14 +458,16 @@ const ProfilePage = () => {
                     <div className="pp-courses-card">
                         <span className="pp-section-badge">Your Courses</span>
                         <div className="pp-course-list">
-                            {userCourses.map((c, idx) => (
+                            {enrolledCourses.length > 0 ? enrolledCourses.map((c, idx) => (
                                 <div key={idx} className="pp-course-item">
                                     <span>{c.title}</span>
-                                    <button className={`pp-course-btn ${c.status}`}>
-                                        {c.status === 'continue' ? 'Continue' : 'Complete'}
-                                    </button>
+                                    <Link to={`/meetings?course=${c._id}`} className="pp-course-btn continue" style={{ textDecoration: 'none' }}>
+                                        Continue
+                                    </Link>
                                 </div>
-                            ))}
+                            )) : (
+                                <p style={{ fontSize: '0.85rem', color: '#999' }}>You haven&apos;t enrolled in any courses yet.</p>
+                            )}
                         </div>
                     </div>
 
@@ -442,18 +475,33 @@ const ProfilePage = () => {
                     <div className="pp-schedule-card">
                         <div className="pp-schedule-header">
                             <h3 className="pp-schedule-title">Upcoming Schedule</h3>
-                            <button className="pp-schedule-add">+</button>
+                            <Link to="/course-calendar" className="pp-schedule-add" style={{ textDecoration: 'none' }}>+</Link>
                         </div>
                         <div className="pp-schedule-list">
-                            {upcomingSchedule.map((s, idx) => (
+                            {upcomingClasses.length > 0 ? upcomingClasses.map((s, idx) => (
                                 <div key={idx} className="pp-schedule-item">
-                                    <div className="pp-schedule-dot" style={{ background: s.color }} />
+                                    <div className="pp-schedule-dot" style={{ background: s.status === 'Live' ? '#e53935' : '#c49696' }} />
                                     <div className="pp-schedule-info">
-                                        <div className="pp-schedule-name">{s.title}</div>
-                                        <div className="pp-schedule-desc">{s.desc}</div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div className="pp-schedule-name">{s.title}</div>
+                                            {s.status === 'Live' && (
+                                                <button
+                                                    onClick={() => window.open(s.meetingLink || '/meetings', '_blank')}
+                                                    style={{
+                                                        fontSize: '0.65rem', padding: '4px 10px', background: '#e53935',
+                                                        color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    JOIN LIVE
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="pp-schedule-desc">{s.date} at {s.time} ({s.instructor})</div>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <p style={{ fontSize: '0.75rem', color: '#999' }}>No upcoming classes.</p>
+                            )}
                         </div>
                     </div>
                 </div>

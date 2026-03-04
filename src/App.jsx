@@ -23,6 +23,8 @@ import ProfilePage from './pages/ProfilePage';
 import EditProfile from './pages/EditProfile';
 import PaymentGateway from './pages/PaymentGateway';
 import Certificate from './pages/Certificate';
+import AdminUsers from './pages/admin/AdminUsers'; // Added
+import ProtectedRoute from './components/ProtectedRoute'; // Added
 import './index.css';
 
 function App() {
@@ -37,24 +39,30 @@ function App() {
         <Route path="/membership" element={<Membership />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/course-details" element={<CourseDetails />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/course-calendar" element={<CourseCalendar />} />
-        <Route path="/meetings" element={<Meetings />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/create-event" element={<CreateEvent />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/add-courses" element={<AddCourses />} />
-        <Route path="/admin/calendar-create" element={<CourseCalendarCreate />} />
-        <Route path="/admin/online-classes" element={<OnlineClasses />} />
-        <Route path="/admin/schedules" element={<Schedules />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/payment-gateway" element={<PaymentGateway />} />
-        <Route path="/certificate" element={<Certificate />} />
+
+        {/* User protected routes */}
+        <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+        <Route path="/course-calendar" element={<ProtectedRoute><CourseCalendar /></ProtectedRoute>} />
+        <Route path="/meetings" element={<ProtectedRoute><Meetings /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+        <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+        <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/payment-gateway" element={<ProtectedRoute><PaymentGateway /></ProtectedRoute>} />
+        <Route path="/certificate" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
+
+        {/* Admin protected routes */}
+        <Route path="/admin" element={<ProtectedRoute roleRequired="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/add-courses" element={<ProtectedRoute roleRequired="admin"><AddCourses /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute roleRequired="admin"><AdminUsers /></ProtectedRoute>} />
+        <Route path="/admin/calendar-create" element={<ProtectedRoute roleRequired="admin"><CourseCalendarCreate /></ProtectedRoute>} />
+        <Route path="/admin/online-classes" element={<ProtectedRoute roleRequired="admin"><OnlineClasses /></ProtectedRoute>} />
+        <Route path="/admin/schedules" element={<ProtectedRoute roleRequired="admin"><Schedules /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
+

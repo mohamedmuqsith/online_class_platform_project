@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
+import { authAPI } from '../api';
 
 const EditProfile = () => {
     const navigate = useNavigate();
@@ -9,47 +10,125 @@ const EditProfile = () => {
         email: '',
         address: '',
         contact: '',
+        bio: '',
+        dateOfBirth: '',
+        gender: '',
     });
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    });
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [changingPassword, setChangingPassword] = useState(false);
+    const [showPasswordSection, setShowPasswordSection] = useState(false);
+    const [message, setMessage] = useState({ text: '', type: '' });
 
-    /* Pre-fill form with logged-in user data */
+    /* Fetch user data from backend API */
     useEffect(() => {
-        const saved = localStorage.getItem('eduflex_user');
-        if (saved) {
-            const user = JSON.parse(saved);
-            setFormData(prev => ({
-                ...prev,
-                name: user.username || '',
-                email: user.email || '',
-                address: user.address || '',
-                contact: user.contact || '',
-            }));
-        }
+        const fetchUser = async () => {
+            try {
+                const user = await authAPI.getUser();
+                setFormData({
+                    name: user.username || '',
+                    email: user.email || '',
+                    address: user.address || '',
+                    contact: user.contact || '',
+                    bio: user.bio || '',
+                    dateOfBirth: user.dateOfBirth || '',
+                    gender: user.gender || '',
+                });
+            } catch (err) {
+                console.error('Failed to fetch user:', err);
+                // Fallback to localStorage
+                const saved = localStorage.getItem('eduflex_user');
+                if (saved) {
+                    const user = JSON.parse(saved);
+                    setFormData(prev => ({
+                        ...prev,
+                        name: user.username || '',
+                        email: user.email || '',
+                        address: user.address || '',
+                        contact: user.contact || '',
+                        bio: user.bio || '',
+                        dateOfBirth: user.dateOfBirth || '',
+                        gender: user.gender || '',
+                    }));
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUser();
     }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handlePasswordChange = (e) => {
+        setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        /* Save updated data back to localStorage */
-        const saved = localStorage.getItem('eduflex_user');
-        const user = saved ? JSON.parse(saved) : {};
-        const updated = {
-            ...user,
-            username: formData.name,
-            email: formData.email,
-            address: formData.address,
-            contact: formData.contact,
-        };
-        localStorage.setItem('eduflex_user', JSON.stringify(updated));
-        alert('Profile saved successfully!');
-        navigate('/profile');
+        setSaving(true);
+        setMessage({ text: '', type: '' });
+
+        try {
+            const updatedUser = await authAPI.updateProfile({
+                username: formData.name,
+                email: formData.email,
+                address: formData.address,
+                contact: formData.contact,
+                bio: formData.bio,
+                dateOfBirth: formData.dateOfBirth,
+                gender: formData.gender,
+            });
+
+            // Update localStorage with server response
+            localStorage.setItem('eduflex_user', JSON.stringify(updatedUser));
+            setMessage({ text: 'Profile updated successfully!', type: 'success' });
+            setTimeout(() => navigate('/profile'), 1500);
+        } catch (err) {
+            setMessage({ text: err.message || 'Failed to update profile', type: 'error' });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        setMessage({ text: '', type: '' });
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setMessage({ text: 'New passwords do not match', type: 'error' });
+            return;
+        }
+        if (passwordData.newPassword.length < 6) {
+            setMessage({ text: 'Password must be at least 6 characters', type: 'error' });
+            return;
+        }
+
+        setChangingPassword(true);
+        try {
+            await authAPI.changePassword(passwordData.currentPassword, passwordData.newPassword);
+            setMessage({ text: 'Password changed successfully!', type: 'success' });
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            setShowPasswordSection(false);
+        } catch (err) {
+            setMessage({ text: err.message || 'Failed to change password', type: 'error' });
+        } finally {
+            setChangingPassword(false);
+        }
     };
 
     const handleCancel = () => {
         navigate('/profile');
     };
+
+    if (loading) return <div style={{ textAlign: 'center', padding: '100px' }}>Loading profile...</div>;
 
     return (
         <div className="ep-wrapper">
@@ -252,6 +331,113 @@ const EditProfile = () => {
                     transform: translateY(-2px);
                     box-shadow: 0 6px 18px rgba(0,0,0,0.2);
                 }
+                .ep-btn-save:disabled, .ep-btn-password:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+                /* Message */
+                .ep-message {
+                    grid-column: 1 / -1;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    text-align: center;
+                }
+                .ep-message.success {
+                    background: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+                .ep-message.error {
+                    background: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+
+                /* Textarea */
+                .ep-textarea {
+                    padding: 15px 18px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 0.95rem;
+                    color: #333;
+                    background: #fff;
+                    outline: none;
+                    transition: border-color 0.3s, box-shadow 0.3s;
+                    font-family: inherit;
+                    resize: vertical;
+                    min-height: 80px;
+                }
+                .ep-textarea:focus {
+                    border-color: #c49696;
+                    box-shadow: 0 0 0 3px rgba(196,150,150,0.12);
+                }
+
+                /* Select */
+                .ep-select {
+                    padding: 15px 18px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 0.95rem;
+                    color: #333;
+                    background: #fff;
+                    outline: none;
+                    transition: border-color 0.3s, box-shadow 0.3s;
+                    font-family: inherit;
+                    cursor: pointer;
+                }
+                .ep-select:focus {
+                    border-color: #c49696;
+                    box-shadow: 0 0 0 3px rgba(196,150,150,0.12);
+                }
+
+                /* Full width field */
+                .ep-field-full {
+                    grid-column: 1 / -1;
+                }
+
+                /* Password Section */
+                .ep-password-section {
+                    grid-column: 1 / -1;
+                    border-top: 2px solid #f0e0e0;
+                    padding-top: 25px;
+                    margin-top: 10px;
+                }
+                .ep-password-toggle {
+                    background: none;
+                    border: none;
+                    color: #c49696;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    padding: 0;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .ep-password-toggle:hover { color: #b08585; }
+                .ep-password-fields {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 20px;
+                    margin-bottom: 15px;
+                }
+                .ep-btn-password {
+                    padding: 12px 30px;
+                    border-radius: 6px;
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    background: #c49696;
+                    color: #fff;
+                    border: none;
+                    transition: all 0.3s;
+                }
+                .ep-btn-password:hover { background: #b08585; }
 
                 /* Responsive */
                 @media (max-width: 640px) {
@@ -262,6 +448,7 @@ const EditProfile = () => {
                     .ep-navbar { padding: 12px 18px; }
                     .ep-buttons { flex-direction: column; align-items: center; gap: 14px; }
                     .ep-btn { width: 100%; text-align: center; }
+                    .ep-password-fields { grid-template-columns: 1fr; }
                 }
             `}</style>
 
@@ -294,6 +481,9 @@ const EditProfile = () => {
 
                 {/* Form */}
                 <form className="ep-form" onSubmit={handleSubmit}>
+                    {message.text && (
+                        <div className={`ep-message ${message.type}`}>{message.text}</div>
+                    )}
                     <div className="ep-field-group">
                         <label className="ep-label">Name</label>
                         <input
@@ -303,6 +493,7 @@ const EditProfile = () => {
                             placeholder="Enter Your Name"
                             value={formData.name}
                             onChange={handleChange}
+                            required
                         />
                     </div>
                     <div className="ep-field-group">
@@ -314,6 +505,7 @@ const EditProfile = () => {
                             placeholder="Enter Your Email"
                             value={formData.email}
                             onChange={handleChange}
+                            required
                         />
                     </div>
                     <div className="ep-field-group">
@@ -338,10 +530,108 @@ const EditProfile = () => {
                             onChange={handleChange}
                         />
                     </div>
+                    <div className="ep-field-group">
+                        <label className="ep-label">Date of Birth</label>
+                        <input
+                            type="date"
+                            name="dateOfBirth"
+                            className="ep-input"
+                            value={formData.dateOfBirth}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <div className="ep-field-group">
+                        <label className="ep-label">Gender</label>
+                        <select
+                            name="gender"
+                            className="ep-select"
+                            value={formData.gender}
+                            onChange={handleChange}
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div className="ep-field-group ep-field-full">
+                        <label className="ep-label">Bio</label>
+                        <textarea
+                            name="bio"
+                            className="ep-textarea"
+                            placeholder="Tell us about yourself..."
+                            value={formData.bio}
+                            onChange={handleChange}
+                            maxLength={300}
+                        />
+                        <span style={{ fontSize: '0.75rem', color: '#999', marginTop: '4px' }}>
+                            {formData.bio.length}/300 characters
+                        </span>
+                    </div>
+
+                    {/* Password Change Section */}
+                    <div className="ep-password-section">
+                        <button
+                            type="button"
+                            className="ep-password-toggle"
+                            onClick={() => setShowPasswordSection(!showPasswordSection)}
+                        >
+                            {showPasswordSection ? '▼' : '▶'} Change Password
+                        </button>
+                        {showPasswordSection && (
+                            <>
+                                <div className="ep-password-fields">
+                                    <div className="ep-field-group">
+                                        <label className="ep-label">Current Password</label>
+                                        <input
+                                            type="password"
+                                            name="currentPassword"
+                                            className="ep-input"
+                                            placeholder="Current password"
+                                            value={passwordData.currentPassword}
+                                            onChange={handlePasswordChange}
+                                        />
+                                    </div>
+                                    <div className="ep-field-group">
+                                        <label className="ep-label">New Password</label>
+                                        <input
+                                            type="password"
+                                            name="newPassword"
+                                            className="ep-input"
+                                            placeholder="New password"
+                                            value={passwordData.newPassword}
+                                            onChange={handlePasswordChange}
+                                        />
+                                    </div>
+                                    <div className="ep-field-group">
+                                        <label className="ep-label">Confirm Password</label>
+                                        <input
+                                            type="password"
+                                            name="confirmPassword"
+                                            className="ep-input"
+                                            placeholder="Confirm new password"
+                                            value={passwordData.confirmPassword}
+                                            onChange={handlePasswordChange}
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="ep-btn-password"
+                                    onClick={handlePasswordSubmit}
+                                    disabled={changingPassword}
+                                >
+                                    {changingPassword ? 'Changing...' : 'Update Password'}
+                                </button>
+                            </>
+                        )}
+                    </div>
 
                     <div className="ep-buttons">
                         <button type="button" className="ep-btn ep-btn-cancel" onClick={handleCancel}>Cancel</button>
-                        <button type="submit" className="ep-btn ep-btn-save">Save</button>
+                        <button type="submit" className="ep-btn ep-btn-save" disabled={saving}>
+                            {saving ? 'Saving...' : 'Save'}
+                        </button>
                     </div>
                 </form>
             </div>

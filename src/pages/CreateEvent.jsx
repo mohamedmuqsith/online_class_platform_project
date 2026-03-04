@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { eventsAPI } from '../api';
 
 const lessons = [
     { title: 'Lesson 01 : Introduction about XD', time: '30 mins', active: true },
@@ -12,6 +13,34 @@ const lessons = [
 const quizzes = Array(11).fill({ title: 'Lesson 01 : Introduction about XD', time: '30 mins' });
 
 const CreateEvent = () => {
+    const [formData, setFormData] = useState({
+        eventName: '',
+        startDate: '',
+        endDate: '',
+        location: '',
+        notification: '30 mins',
+        email: '',
+        description: '',
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            await eventsAPI.create(formData);
+            alert('Event Saved Successfully!');
+            window.location.href = '/course-calendar';
+        } catch (err) {
+            alert(err.message || 'Failed to save event');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
             <style>{`
@@ -198,45 +227,47 @@ const CreateEvent = () => {
 
                         <div className="form-group full">
                             <label className="form-label">Event Name</label>
-                            <input type="text" className="form-input" defaultValue="Adobe XD Auto - Animate : Your Guide to Creating" />
+                            <input type="text" className="form-input" name="eventName" value={formData.eventName} onChange={handleChange} placeholder="Enter event name" />
                         </div>
 
                         <div className="form-row">
                             <div className="form-group">
                                 <label className="form-label">Start date / Time</label>
-                                <input type="text" className="form-input" defaultValue="September 24, 2017 07:59 am" />
+                                <input type="datetime-local" className="form-input" name="startDate" value={formData.startDate} onChange={handleChange} />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">End Date / Time</label>
-                                <input type="text" className="form-input" defaultValue="September 24, 2017 07:59 am" />
+                                <input type="datetime-local" className="form-input" name="endDate" value={formData.endDate} onChange={handleChange} />
                             </div>
                         </div>
 
                         <div className="form-group full">
                             <label className="form-label">Location</label>
-                            <input type="text" className="form-input" defaultValue="2118 Thornridge Cir, Syracuse, Connecticut 35624" />
+                            <input type="text" className="form-input" name="location" value={formData.location} onChange={handleChange} placeholder="Enter location" />
                         </div>
 
                         <div className="form-row">
                             <div className="form-group">
                                 <label className="form-label">Notification</label>
-                                <select className="form-select">
+                                <select className="form-select" name="notification" value={formData.notification} onChange={handleChange}>
                                     <option>30 mins</option>
                                     <option>1 hour</option>
                                 </select>
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Email</label>
-                                <input type="text" className="form-input" defaultValue="jessica.hansome@example.com" />
+                                <input type="email" className="form-input" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email" />
                             </div>
                         </div>
 
                         <div className="form-group full">
                             <label className="form-label">Event Description</label>
-                            <textarea className="form-textarea" defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip."></textarea>
+                            <textarea className="form-textarea" name="description" value={formData.description} onChange={handleChange} placeholder="Enter event description"></textarea>
                         </div>
 
-                        <button className="save-btn" onClick={() => { alert('Event Saved Successfully!'); window.location.href = '/course-calendar'; }}>Save Now</button>
+                        <button className="save-btn" onClick={handleSave} disabled={loading}>
+                            {loading ? 'Saving...' : 'Save Now'}
+                        </button>
                         <div style={{ clear: 'both' }}></div>
                     </div>
                 </div>

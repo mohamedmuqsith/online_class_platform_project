@@ -1,8 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { paymentsAPI, coursesAPI } from '../api';
 
 const Payment = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [course, setCourse] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        nameOnCard: '',
+        cardNumber: '',
+        expDate: '',
+        cvc: '',
+        saveInfo: false,
+    });
+
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const queryParams = new URLSearchParams(location.search);
+                const id = queryParams.get('id');
+                if (id) {
+                    const data = await coursesAPI.getById(id);
+                    setCourse(data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch course:', err);
+            }
+        };
+        fetchCourse();
+    }, [location.search]);
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!course) {
+            alert('No course selected for payment.');
+            return;
+        }
+        if (!formData.nameOnCard || !formData.cardNumber || !formData.expDate || !formData.cvc) {
+            alert('Please fill in all payment fields.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await paymentsAPI.process({
+                courses: [{ course: course._id, title: course.title, price: course.price }],
+                subtotal: course.price,
+                tax: 5,
+                total: course.price + 5,
+                paymentMethod: 'credit_card',
+                cardLast4: formData.cardNumber.slice(-4),
+            });
+            alert('Payment confirmed successfully!');
+            navigate('/home');
+        } catch (err) {
+            alert(err.message || 'Payment failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const subtotal = course ? course.price : 0;
+    const tax = 5;
+    const total = subtotal + tax;
+
     return (
         <div>
             <Navbar />
@@ -308,7 +376,7 @@ const Payment = () => {
 
             <div className="payment-container">
                 {/* Checkout Section */}
-                <div className="checkout-section">
+                <form className="checkout-section" onSubmit={handleSubmit}>
                     <h2 className="checkout-title">Checkout</h2>
                     <span className="cart-type-label">Cart Type</span>
 
@@ -324,77 +392,76 @@ const Payment = () => {
 
                     <div className="form-group">
                         <label className="form-label">Name on Card</label>
-                        <input type="text" className="form-input" placeholder="Enter name on Card" />
+                        <input type="text" name="nameOnCard" className="form-input" placeholder="Enter name on Card" value={formData.nameOnCard} onChange={handleChange} />
                     </div>
 
                     <div className="form-group">
                         <label className="form-label">Card Number</label>
-                        <input type="text" className="form-input" placeholder="Enter Card Number" />
+                        <input type="text" name="cardNumber" className="form-input" placeholder="Enter Card Number" value={formData.cardNumber} onChange={handleChange} />
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
                             <label className="form-label">Expiration Date ( MM/YY )</label>
-                            <input type="text" className="form-input" placeholder="Enter Expiration Date" />
+                            <input type="text" name="expDate" className="form-input" placeholder="Enter Expiration Date" value={formData.expDate} onChange={handleChange} />
                         </div>
                         <div className="form-group">
                             <label className="form-label">CVC</label>
-                            <input type="text" className="form-input" placeholder="Enter CVC" />
+                            <input type="text" name="cvc" className="form-input" placeholder="Enter CVC" value={formData.cvc} onChange={handleChange} />
                         </div>
                     </div>
 
                     <div className="checkbox-group">
-                        <input type="checkbox" id="saveInfo" />
+                        <input type="checkbox" id="saveInfo" name="saveInfo" checked={formData.saveInfo} onChange={handleChange} />
                         <label htmlFor="saveInfo">Save my information for faster checkout</label>
                     </div>
 
-                    <button className="confirm-btn">Confirm Payment</button>
-                </div>
+                    <button type="submit" className="confirm-btn" disabled={loading}>
+                        {loading ? 'Processing...' : 'Confirm Payment'}
+                    </button>
+                </form>
 
                 {/* Summary Section */}
                 <div className="summary-section">
                     <div className="summary-card">
                         <h3 className="summary-title">Summary</h3>
 
-                        <div className="summary-item">
-                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100" className="summary-item-img" alt="Course thumbnail" />
-                            <div className="summary-item-text">
-                                <div className="summary-item-title">adipisising elit, sed do eiusmod</div>
-                                <div className="summary-item-desc">Lorem ipsum dollar...</div>
-                                <div className="summary-item-price">$24.69</div>
-                            </div>
-                        </div>
+                        {course ? (
+                            <>
+                                <div className="summary-item">
+                                    <img src={course.image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100'} className="summary-item-img" alt="Course thumbnail" />
+                                    <div className="summary-item-text">
+                                        <div className="summary-item-title">{course.title}</div>
+                                        <div className="summary-item-desc">{course.category || 'Course'}</div>
+                                        <div className="summary-item-price">${course.price}</div>
+                                    </div>
+                                </div>
 
-                        <div className="summary-item">
-                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100" className="summary-item-img" alt="Course thumbnail" />
-                            <div className="summary-item-text">
-                                <div className="summary-item-title">sed do eiusmod tempor</div>
-                                <div className="summary-item-desc">Lorem ipsum dollar...</div>
-                                <div className="summary-item-price">$24.69</div>
-                            </div>
-                        </div>
+                                <div className="summary-divider"></div>
 
-                        <div className="summary-divider"></div>
+                                <div className="summary-row">
+                                    <span>Subtotal</span>
+                                    <span>${subtotal}</span>
+                                </div>
+                                <div className="summary-row">
+                                    <span>Coupon Discount</span>
+                                    <span>0 %</span>
+                                </div>
+                                <div className="summary-row" style={{ marginBottom: '20px' }}>
+                                    <span>TAX</span>
+                                    <span>${tax}</span>
+                                </div>
 
-                        <div className="summary-row">
-                            <span>Subtotal</span>
-                            <span>$51.38</span>
-                        </div>
-                        <div className="summary-row">
-                            <span>Coupon Discount</span>
-                            <span>0 %</span>
-                        </div>
-                        <div className="summary-row" style={{ marginBottom: '20px' }}>
-                            <span>TAX</span>
-                            <span>5</span>
-                        </div>
+                                <div className="summary-divider"></div>
 
-                        <div className="summary-divider"></div>
-
-                        <div className="summary-total">
-                            <span>Total</span>
-                            <span>$56.38</span>
-                        </div>
+                                <div className="summary-total">
+                                    <span>Total</span>
+                                    <span>${total}</span>
+                                </div>
+                            </>
+                        ) : (
+                            <p style={{ fontSize: '0.85rem', color: '#999', textAlign: 'center', padding: '20px 0' }}>No course selected. <a href="/courses" style={{ color: '#c49696' }}>Browse courses</a></p>
+                        )}
                     </div>
                 </div>
             </div>
