@@ -1,38 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { coursesAPI } from '../api';
 
 const filters = ['Subject', 'Partner', 'Program', 'Language', 'Availability', 'Learning Type'];
 
-const mainCourses = Array(8).fill({
-    title: 'AWS Certified solutions Architect',
-    desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
-    category: 'Design',
-    duration: '3 Month',
-    instructor: 'Lina',
-    oldPrice: '$10',
-    newPrice: '$8',
-    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop'
-});
-
-const recommendedCourses = Array(4).fill({
-    title: 'AWS Certified solutions Architect',
-    desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
-    category: 'Design',
-    duration: '3 Month',
-    instructor: 'Lina',
-    oldPrice: '$10',
-    newPrice: '$8',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop'
-});
-
 const creators = [
-    { name: 'Jane Cooper', image: 'https://images.unsplash.com/photo-1580489944761-15a3bbd7547b?w=200&h=200&fit=crop' },
-    { name: 'Adam', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop' },
-    { name: 'Tamara', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop' }
+    { name: 'Sarah Johnson', image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop' },
+    { name: 'Michael Chen', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop' },
+    { name: 'Emily Davis', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop' },
 ];
 
 const Search = () => {
+    const [courses, setCourses] = useState([]);
+    const [recommended, setRecommended] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchText, setSearchText] = useState('');
+    const location = useLocation();
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setLoading(true);
+                const queryParams = new URLSearchParams(location.search);
+                const query = queryParams.get('query') || '';
+                const category = queryParams.get('category') || '';
+
+                // Fetch all courses
+                const allCourses = await coursesAPI.getAll();
+
+                // Filter logic (Front-end filtering for now, could be backend)
+                let filtered = allCourses;
+                if (query) {
+                    filtered = filtered.filter(c =>
+                        c.title.toLowerCase().includes(query.toLowerCase()) ||
+                        c.description.toLowerCase().includes(query.toLowerCase())
+                    );
+                }
+                if (category) {
+                    filtered = filtered.filter(c =>
+                        c.category.toLowerCase() === category.toLowerCase()
+                    );
+                }
+
+                setCourses(filtered);
+                setRecommended(allCourses.slice(0, 4)); // Just take first 4 as recommended
+            } catch (err) {
+                console.error('Search yield error:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, [location.search]);
+
     return (
         <div style={{ background: '#fdf6f6', minHeight: '100vh' }}>
             <Navbar />
@@ -297,8 +320,15 @@ const Search = () => {
 
             <div className="search-hero">
                 <div className="search-bar-wrap">
-                    <input type="text" className="search-input" placeholder="Search your favourite course" />
-                    <button className="search-submit" onClick={() => alert('Searching for courses...')}>Search</button>
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder="Search your favourite course"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/search?query=${encodeURIComponent(searchText)}`)}
+                    />
+                    <button className="search-submit" onClick={() => window.location.href = `/search?query=${encodeURIComponent(searchText)}`}>Search</button>
                 </div>
 
                 <div className="filter-row">
@@ -312,57 +342,64 @@ const Search = () => {
 
             <div className="search-content">
                 {/* Main Course Grid */}
-                <div className="course-grid">
-                    {mainCourses.map((c, i) => (
-                        <div key={i} className="s-card" onClick={() => window.location.href = '/course-details'} style={{ cursor: 'pointer' }}>
-                            <img src={c.image} className="s-card-img" alt={c.title} />
-                            <div className="s-card-body">
-                                <div className="s-card-meta">
-                                    <span>📚 {c.category}</span>
-                                    <span>⏱ {c.duration}</span>
-                                </div>
-                                <h3 className="s-card-title">{c.title}</h3>
-                                <p className="s-card-desc">{c.desc}</p>
-                                <div className="s-card-footer">
-                                    <div className="s-instructor">
-                                        <span className="s-avatar">👩</span>
-                                        {c.instructor}
+                <h2 className="grid-title" style={{ marginBottom: '20px' }}>Search Results</h2>
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '40px', fontSize: '1.2rem', color: '#666' }}>Loading results...</div>
+                ) : courses.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px', fontSize: '1.2rem', color: '#666' }}>No courses found matching your criteria.</div>
+                ) : (
+                    <div className="course-grid">
+                        {courses.map((c, i) => (
+                            <div key={i} className="s-card" onClick={() => window.location.href = `/course-details?id=${c._id}`} style={{ cursor: 'pointer' }}>
+                                <img src={c.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop'} className="s-card-img" alt={c.title} />
+                                <div className="s-card-body">
+                                    <div className="s-card-meta">
+                                        <span>📚 {c.category}</span>
+                                        <span>⏱ 1 Month</span>
                                     </div>
-                                    <div className="s-price">
-                                        <span className="s-old-price">{c.oldPrice}</span>
-                                        <span className="s-new-price">{c.newPrice}</span>
+                                    <h3 className="s-card-title">{c.title}</h3>
+                                    <p className="s-card-desc">{c.description?.length > 80 ? c.description.substring(0, 80) + '...' : c.description}</p>
+                                    <div className="s-card-footer">
+                                        <div className="s-instructor">
+                                            <span className="s-avatar">👩</span>
+                                            {c.instructor?.username || 'Admin'}
+                                        </div>
+                                        <div className="s-price">
+                                            <span className="s-old-price">${c.price + 20}</span>
+                                            <span className="s-new-price">${c.price}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Recommended Section */}
                 <div className="grid-title-row">
                     <h2 className="grid-title">Recommended for you</h2>
-                    <span className="see-all-link">See all</span>
+                    <span className="see-all-link" onClick={() => window.location.href = '/courses'}>See all</span>
                 </div>
 
                 <div className="course-grid">
-                    {recommendedCourses.map((c, i) => (
-                        <div key={i} className="s-card" onClick={() => window.location.href = '/course-details'} style={{ cursor: 'pointer' }}>
-                            <img src={c.image} className="s-card-img" alt={c.title} />
+                    {recommended.map((c, i) => (
+                        <div key={i} className="s-card" onClick={() => window.location.href = `/course-details?id=${c._id}`} style={{ cursor: 'pointer' }}>
+                            <img src={c.image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop'} className="s-card-img" alt={c.title} />
                             <div className="s-card-body">
                                 <div className="s-card-meta">
                                     <span>📚 {c.category}</span>
-                                    <span>⏱ {c.duration}</span>
+                                    <span>⏱ 1 Month</span>
                                 </div>
                                 <h3 className="s-card-title">{c.title}</h3>
-                                <p className="s-card-desc">{c.desc}</p>
+                                <p className="s-card-desc">{c.description?.length > 80 ? c.description.substring(0, 80) + '...' : c.description}</p>
                                 <div className="s-card-footer">
                                     <div className="s-instructor">
                                         <span className="s-avatar">👩</span>
-                                        {c.instructor}
+                                        {c.instructor?.username || 'Admin'}
                                     </div>
                                     <div className="s-price">
-                                        <span className="s-old-price">{c.oldPrice}</span>
-                                        <span className="s-new-price">{c.newPrice}</span>
+                                        <span className="s-old-price">${c.price + 20}</span>
+                                        <span className="s-new-price">${c.price}</span>
                                     </div>
                                 </div>
                             </div>

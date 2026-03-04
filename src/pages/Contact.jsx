@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { contactAPI } from '../api';
 
 const Contact = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSend = async () => {
+        if (!name.trim() || !email.trim() || !message.trim()) {
+            setError('Please fill in all fields.');
+            return;
+        }
+        setLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const data = await contactAPI.send({ name, email, message });
+            setSuccess(data.msg || 'Message sent successfully!');
+            setName('');
+            setEmail('');
+            setMessage('');
+        } catch (err) {
+            setError(err.message || 'Failed to send message.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div style={{ background: '#fdf6f6', minHeight: '100vh', paddingBottom: '20px' }}>
             <Navbar />
@@ -198,20 +227,25 @@ const Contact = () => {
                     <div className="contact-form">
                         <h3 className="contact-form-title">Leave us a message</h3>
 
+                        {error && <div style={{ background: '#ffe0e0', color: '#c44', padding: '10px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '0.85rem', fontWeight: 600 }}>{error}</div>}
+                        {success && <div style={{ background: '#e0ffe0', color: '#2a7a2a', padding: '10px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '0.85rem', fontWeight: 600 }}>{success}</div>}
+
                         <div className="form-group">
                             <label className="form-label">Name</label>
-                            <input type="text" className="form-input" placeholder="First_Name Last_Name" />
+                            <input type="text" className="form-input" placeholder="First_Name Last_Name" value={name} onChange={(e) => setName(e.target.value)} />
                         </div>
 
                         <div className="form-group">
-                            <input type="email" className="form-input" placeholder="Email Address" />
+                            <input type="email" className="form-input" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} />
                         </div>
 
                         <div className="form-group">
-                            <textarea className="form-textarea" placeholder="Your Message"></textarea>
+                            <textarea className="form-textarea" placeholder="Your Message" value={message} onChange={(e) => setMessage(e.target.value)}></textarea>
                         </div>
 
-                        <button className="send-btn" onClick={() => alert('Message Sent Successfully!')}>Send</button>
+                        <button className="send-btn" onClick={handleSend} disabled={loading}>
+                            {loading ? 'Sending...' : 'Send'}
+                        </button>
                     </div>
 
                     {/* Info Section */}

@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-
-const orderItems = [
-    { title: 'adipiscing elit, sed do eiusmod', sub: 'Lorem ipsum dolor…', price: '$24.69' },
-    { title: 'sed do eiusmod tempor', sub: 'Lorem ipsum dolor…', price: '$24.69' },
-];
+import { paymentsAPI, coursesAPI } from '../api';
 
 const deals = [
     { discount: '50%', title: 'AWS Certified Solutions Architect', desc: 'This course helps students learn key concepts through simple and clear lessons.', color: '#c49696' },
@@ -15,7 +11,11 @@ const deals = [
 ];
 
 const PaymentGateway = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [cardType, setCardType] = useState('visa');
+    const [loading, setLoading] = useState(false);
+    const [course, setCourse] = useState(null);
     const [formData, setFormData] = useState({
         nameOnCard: '',
         cardNumber: '',
@@ -24,14 +24,47 @@ const PaymentGateway = () => {
         saveInfo: false,
     });
 
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const queryParams = new URLSearchParams(location.search);
+                const id = queryParams.get('id');
+                if (id) {
+                    const data = await coursesAPI.getById(id);
+                    setCourse(data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch course for payment:', err);
+            }
+        };
+        fetchCourse();
+    }, [location.search]);
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert('Payment confirmed successfully!');
+        if (!course) return;
+        setLoading(true);
+        try {
+            await paymentsAPI.process({
+                courses: [{ course: course._id, title: course.title, price: course.price }],
+                subtotal: course.price,
+                tax: 5,
+                total: course.price + 5,
+                paymentMethod: cardType === 'visa' ? 'credit_card' : 'debit_card',
+                cardLast4: formData.cardNumber.slice(-4),
+            });
+            alert('Payment confirmed successfully!');
+            navigate('/home');
+        } catch (err) {
+            alert(err.message || 'Payment failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -358,20 +391,24 @@ const PaymentGateway = () => {
                     {/* Summary */}
                     <div className="pg-summary-card">
                         <h3 className="pg-summary-title">Summary</h3>
-                        {orderItems.map((item, idx) => (
-                            <div key={idx} className="pg-summary-item">
-                                <div className="pg-summary-thumb">📚</div>
-                                <div className="pg-summary-info">
-                                    <div className="pg-summary-item-title">{item.title}</div>
-                                    <div className="pg-summary-item-sub">{item.sub}</div>
+                        {course ? (
+                            <>
+                                <div className="pg-summary-item">
+                                    <div className="pg-summary-thumb">📚</div>
+                                    <div className="pg-summary-info">
+                                        <div className="pg-summary-item-title">{course.title}</div>
+                                        <div className="pg-summary-item-sub">{course.category}</div>
+                                    </div>
+                                    <span className="pg-summary-item-price">${course.price}</span>
                                 </div>
-                                <span className="pg-summary-item-price">{item.price}</span>
-                            </div>
-                        ))}
-                        <div className="pg-summary-line"><span>Subtotal</span><strong>$51.38</strong></div>
-                        <div className="pg-summary-line"><span>Coupon Discount</span><span>0 %</span></div>
-                        <div className="pg-summary-line"><span>TAX</span><span>5</span></div>
-                        <div className="pg-summary-line total"><span>Total</span><strong>$56.38</strong></div>
+                                <div className="pg-summary-line"><span>Subtotal</span><strong>${course.price}</strong></div>
+                                <div className="pg-summary-line"><span>Coupon Discount</span><span>0 %</span></div>
+                                <div className="pg-summary-line"><span>TAX</span><span>$5</span></div>
+                                <div className="pg-summary-line total"><span>Total</span><strong>${course.price + 5}</strong></div>
+                            </>
+                        ) : (
+                            <p style={{ fontSize: '0.82rem', color: '#999' }}>No course selected.</p>
+                        )}
                     </div>
                 </div>
 

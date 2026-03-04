@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-
-const certificates = [
-    { title: 'Project Management' },
-    { title: 'React' },
-    { title: 'UI/UX Design Fundamentals' },
-];
+import { certificatesAPI } from '../api';
 
 const Certificate = () => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [certificates, setCertificates] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCertificates = async () => {
+            try {
+                const data = await certificatesAPI.getAll();
+                setCertificates(data || []);
+            } catch (err) {
+                console.error('Failed to fetch certificates:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCertificates();
+    }, []);
 
     const filteredCerts = certificates.filter(c =>
         c.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -198,15 +209,17 @@ const Certificate = () => {
                 <div className="cert-card">
                     <span className="cert-card-badge">Your Certificates</span>
                     <div className="cert-list">
-                        {filteredCerts.length > 0 ? (
+                        {loading ? (
+                            <div className="cert-no-results">Loading certificates...</div>
+                        ) : filteredCerts.length > 0 ? (
                             filteredCerts.map((cert, idx) => (
-                                <div key={idx} className="cert-item">
-                                    <span className="cert-item-title">{cert.title}</span>
+                                <div key={cert._id || idx} className="cert-item">
+                                    <span className="cert-item-title">{cert.title}{cert.course?.title ? ` - ${cert.course.title}` : ''}</span>
                                     <button className="cert-download-btn" onClick={() => handleDownload(cert.title)}>Download</button>
                                 </div>
                             ))
                         ) : (
-                            <div className="cert-no-results">No certificates found matching your search.</div>
+                            <div className="cert-no-results">{certificates.length === 0 ? 'You haven\'t earned any certificates yet.' : 'No certificates found matching your search.'}</div>
                         )}
                     </div>
                 </div>

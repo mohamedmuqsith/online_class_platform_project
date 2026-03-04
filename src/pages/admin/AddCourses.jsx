@@ -1,32 +1,57 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
+import { coursesAPI } from '../../api';
 
 const sidebarItems = [
     { label: 'Dashboard', path: '/admin' },
     { label: 'Courses', path: '/admin/add-courses' },
+    { label: 'Users', path: '/admin/users' },
     { label: 'Schedule', path: '/admin/calendar-create' },
     { label: 'Online Classes', path: '/admin/online-classes' },
     { label: 'Schedules', path: '/admin/schedules' },
 ];
 
 const AddCourses = () => {
+    const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState(1);
     const [formData, setFormData] = useState({
-        eventName: '',
-        addLessons: '',
-        lessonType: '',
-        notification: '30 mins',
-        lessonDescription: '',
+        title: '',
+        description: '',
+        price: '',
+        category: '',
+        level: 'Beginner',
+        image: '',
     });
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert('Course saved successfully!');
+        setLoading(true);
+
+        try {
+            await coursesAPI.create({
+                ...formData,
+                price: Number(formData.price)
+            });
+            alert('Course created successfully!');
+            setFormData({
+                title: '',
+                description: '',
+                price: '',
+                category: '',
+                level: 'Beginner',
+                image: '',
+            });
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -201,8 +226,7 @@ const AddCourses = () => {
                     color: #bbb;
                 }
                 .ac-form-select {
-                    width: auto;
-                    min-width: 200px;
+                    width: 100%;
                     padding: 14px 38px 14px 18px;
                     border: 1px solid #e0e0e0;
                     border-radius: 8px;
@@ -262,6 +286,10 @@ const AddCourses = () => {
                     transform: translateY(-2px);
                     box-shadow: 0 6px 20px rgba(196,150,150,0.35);
                 }
+                .ac-save-btn:disabled {
+                    background: #d4b0b0;
+                    cursor: wait;
+                }
 
                 /* Responsive */
                 @media (max-width: 768px) {
@@ -304,11 +332,7 @@ const AddCourses = () => {
                 <div className="ac-header-banner">
                     <div>
                         <h1 className="ac-header-title">Add Courses</h1>
-                        <p className="ac-header-sub">Introduction about XD</p>
-                    </div>
-                    <div className="ac-header-meta">
-                        <span>⏱</span>
-                        <span>1 hour</span>
+                        <p className="ac-header-sub">Manage your platform courses here</p>
                     </div>
                 </div>
 
@@ -319,68 +343,85 @@ const AddCourses = () => {
                     <div className="ac-form-card">
                         <form onSubmit={handleSubmit}>
                             <div className="ac-form-group">
-                                <label className="ac-form-label">Event Name</label>
+                                <label className="ac-form-label">Course Title</label>
                                 <input
                                     type="text"
-                                    name="eventName"
+                                    name="title"
                                     className="ac-form-input"
-                                    placeholder="Adobe XD Auto - Animate : Your Guide to Creating"
-                                    value={formData.eventName}
+                                    placeholder="e.g. Adobe XD Auto - Animate"
+                                    value={formData.title}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
 
                             <div className="ac-form-group">
-                                <label className="ac-form-label">Add Lessons</label>
+                                <label className="ac-form-label">Category</label>
                                 <input
                                     type="text"
-                                    name="addLessons"
+                                    name="category"
                                     className="ac-form-input"
-                                    placeholder="September 24, 2017 07:59 am"
-                                    value={formData.addLessons}
+                                    placeholder="e.g. Design"
+                                    value={formData.category}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
 
                             <div className="ac-form-group">
-                                <label className="ac-form-label">Lesson Type</label>
+                                <label className="ac-form-label">Price ($)</label>
                                 <input
-                                    type="text"
-                                    name="lessonType"
+                                    type="number"
+                                    name="price"
                                     className="ac-form-input"
-                                    placeholder="Lesson Type"
-                                    value={formData.lessonType}
+                                    placeholder="e.g. 50"
+                                    value={formData.price}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
 
                             <div className="ac-form-group">
-                                <label className="ac-form-label">Notification</label>
+                                <label className="ac-form-label">Level</label>
                                 <select
-                                    name="notification"
+                                    name="level"
                                     className="ac-form-select"
-                                    value={formData.notification}
+                                    value={formData.level}
                                     onChange={handleChange}
                                 >
-                                    <option value="15 mins">15 mins</option>
-                                    <option value="30 mins">30 mins</option>
-                                    <option value="1 hour">1 hour</option>
-                                    <option value="2 hours">2 hours</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
                                 </select>
                             </div>
 
                             <div className="ac-form-group">
-                                <label className="ac-form-label">Lesson Description</label>
-                                <textarea
-                                    name="lessonDescription"
-                                    className="ac-form-textarea"
-                                    placeholder="Lesson Description"
-                                    value={formData.lessonDescription}
+                                <label className="ac-form-label">Image URL</label>
+                                <input
+                                    type="text"
+                                    name="image"
+                                    className="ac-form-input"
+                                    placeholder="e.g. https://images.unsplash.com/..."
+                                    value={formData.image}
                                     onChange={handleChange}
                                 />
                             </div>
 
-                            <button type="submit" className="ac-save-btn">Save Now</button>
+                            <div className="ac-form-group">
+                                <label className="ac-form-label">Course Description</label>
+                                <textarea
+                                    name="description"
+                                    className="ac-form-textarea"
+                                    placeholder="Describe what students will learn..."
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" className="ac-save-btn" disabled={loading}>
+                                {loading ? 'Saving...' : 'Save Now'}
+                            </button>
                         </form>
                     </div>
                 </div>

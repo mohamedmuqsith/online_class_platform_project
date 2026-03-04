@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
+import { onlineClassesAPI } from '../../api';
 
 const sidebarItems = [
     { label: 'Dashboard', path: '/admin' },
     { label: 'Courses', path: '/admin/add-courses' },
+    { label: 'Users', path: '/admin/users' },
     { label: 'Schedule', path: '/admin/calendar-create' },
     { label: 'Online Classes', path: '/admin/online-classes' },
     { label: 'Schedules', path: '/admin/schedules' },
 ];
 
-/* Sample class data */
-const upcomingClasses = [
+/* Fallback sample class data */
+const fallbackClasses = [
     { id: 1, title: 'Adobe XD Auto-Animate', instructor: 'Sarah Johnson', date: 'Feb 20, 2026', time: '10:00 AM', duration: '1.5 hrs', students: 24, status: 'Live' },
     { id: 2, title: 'Figma Advanced Prototyping', instructor: 'Michael Chen', date: 'Feb 20, 2026', time: '2:00 PM', duration: '2 hrs', students: 18, status: 'Scheduled' },
     { id: 3, title: 'React Fundamentals', instructor: 'Emily Davis', date: 'Feb 21, 2026', time: '9:00 AM', duration: '1 hr', students: 35, status: 'Scheduled' },
@@ -21,7 +23,73 @@ const upcomingClasses = [
 ];
 
 const OnlineClasses = () => {
-    const [activeItem, setActiveItem] = useState(3);
+    const [activeItem, setActiveItem] = useState(4);
+    const [upcomingClasses, setUpcomingClasses] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
+    const [formData, setFormData] = useState({
+        title: '',
+        instructor: '',
+        date: '',
+        time: '',
+        duration: '',
+        status: 'Scheduled',
+        meetingLink: ''
+    });
+
+    const fetchClasses = async () => {
+        try {
+            const data = await onlineClassesAPI.getAll();
+            setUpcomingClasses(data || []);
+        } catch (err) {
+            console.error('Failed to fetch classes:', err);
+        } finally {
+            setPageLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchClasses();
+    }, []);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await onlineClassesAPI.create(formData);
+            alert('Class created successfully!');
+            setShowModal(false);
+            setFormData({
+                title: '',
+                instructor: '',
+                date: '',
+                time: '',
+                duration: '',
+                status: 'Scheduled',
+                meetingLink: ''
+            });
+            fetchClasses();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this class?')) return;
+        try {
+            await onlineClassesAPI.delete(id);
+            setUpcomingClasses(upcomingClasses.filter(c => (c._id || c.id) !== id));
+        } catch (err) {
+            alert(`Failed to delete: ${err.message}`);
+        }
+    };
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f0f2f5' }}>
@@ -171,7 +239,7 @@ const OnlineClasses = () => {
                     <h1 className="oc-header-title">Online Classes</h1>
                     <div className="oc-header-actions">
                         <button className="oc-header-btn">View Calendar</button>
-                        <button className="oc-header-btn primary">+ New Class</button>
+                        <button className="oc-header-btn primary" onClick={() => setShowModal(true)}>+ New Class</button>
                     </div>
                 </div>
 
@@ -219,14 +287,78 @@ const OnlineClasses = () => {
                                     <span className="oc-class-meta-item">👥 {cls.students} students</span>
                                 </div>
                                 <div className="oc-class-actions">
-                                    <button className="oc-class-btn join">{cls.status === 'Live' ? 'Join Now' : 'Start Class'}</button>
-                                    <button className="oc-class-btn details">Details</button>
+                                    <button
+                                        className="oc-class-btn join"
+                                        onClick={() => window.open(cls.meetingLink || '#', '_blank')}
+                                    >
+                                        {cls.status === 'Live' ? 'Join Now' : 'Start Class'}
+                                    </button>
+                                    <button
+                                        className="oc-class-btn details"
+                                        onClick={() => handleDelete(cls._id || cls.id)}
+                                        style={{ background: '#fee2e2', color: '#991b1b' }}
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
+
+            {/* CREATE MODAL */}
+            {showModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        background: '#fff', borderRadius: '20px', padding: '35px', width: '100%', maxWidth: '500px',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                    }}>
+                        <h2 style={{ marginBottom: '25px', color: '#333', fontFamily: 'serif' }}>Create New Online Class</h2>
+                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <input name="title" className="oc-modal-input" placeholder="Class Title" value={formData.title} onChange={handleChange} required />
+                            <input name="instructor" className="oc-modal-input" placeholder="Instructor Name" value={formData.instructor} onChange={handleChange} required />
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input name="date" type="text" className="oc-modal-input" placeholder="Date (e.g. Feb 25)" value={formData.date} onChange={handleChange} required style={{ flex: 1 }} />
+                                <input name="time" type="text" className="oc-modal-input" placeholder="Time (e.g. 10:00 AM)" value={formData.time} onChange={handleChange} required style={{ flex: 1 }} />
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input name="duration" className="oc-modal-input" placeholder="Duration (e.g. 2 hrs)" value={formData.duration} onChange={handleChange} style={{ flex: 1 }} />
+                                <select name="status" className="oc-modal-input" value={formData.status} onChange={handleChange} style={{ flex: 1 }}>
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Live">Live</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                            <input name="meetingLink" className="oc-modal-input" placeholder="Meeting Link (URL)" value={formData.meetingLink} onChange={handleChange} />
+
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                                <button type="button" onClick={() => setShowModal(false)} className="oc-modal-btn cancel">Cancel</button>
+                                <button type="submit" className="oc-modal-btn save" disabled={loading}>
+                                    {loading ? 'Saving...' : 'Create Class'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <style>{`
+                        .oc-modal-input {
+                            padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none;
+                        }
+                        .oc-modal-input:focus { border-color: #c49696; }
+                        .oc-modal-btn {
+                            flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; transition: 0.3s;
+                        }
+                        .oc-modal-btn.cancel { background: #f5f5f5; color: #666; }
+                        .oc-modal-btn.cancel:hover { background: #eee; }
+                        .oc-modal-btn.save { background: #c49696; color: #fff; }
+                        .oc-modal-btn.save:hover { background: #b08585; }
+                    `}</style>
+                </div>
+            )}
         </div>
     );
 };

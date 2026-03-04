@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useLocation } from 'react-router-dom';
+import { coursesAPI } from '../api';
 
 const CourseContents = [
     { title: 'Get Started', duration: '1 Hour', lessons: '5 Lessons', completed: true },
@@ -11,10 +13,28 @@ const CourseContents = [
 ];
 
 const Meetings = () => {
+    const location = useLocation();
     const [openIndex, setOpenIndex] = useState(1);
     const [isCamOn, setIsCamOn] = useState(true);
     const [isMicOn, setIsMicOn] = useState(true);
     const [currentPage, setCurrentPage] = useState(2);
+    const [course, setCourse] = useState(null);
+
+    useEffect(() => {
+        const fetchCourse = async () => {
+            const queryParams = new URLSearchParams(location.search);
+            const id = queryParams.get('course');
+            if (id) {
+                try {
+                    const data = await coursesAPI.getById(id);
+                    setCourse(data);
+                } catch (e) {
+                    console.error('Failed to fetch course for meeting:', e);
+                }
+            }
+        };
+        fetchCourse();
+    }, [location.search]);
 
     return (
         <div style={{ background: '#fdf6f6', minHeight: '100vh' }}>
@@ -292,8 +312,8 @@ const Meetings = () => {
                 <div className="mt-header">
                     <button className="mt-back-btn" onClick={() => window.location.href = '/course-calendar'}>←</button>
                     <div className="mt-title-info">
-                        <h1 className="mt-title">UX/UI Design Conference Meeting</h1>
-                        <p className="mt-subtitle">9 Lesson • 6h 30min</p>
+                        <h1 className="mt-title">{course ? `${course.title} Conference Meeting` : 'UX/UI Design Conference Meeting'}</h1>
+                        <p className="mt-subtitle">{course ? course.category : '9 Lesson • 6h 30min'}</p>
                     </div>
                 </div>
 

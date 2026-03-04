@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { coursesAPI } from '../api';
 
-const courseItems = [
+const fallbackCourseItems = [
     {
         title: 'Top 10 Learning Activities',
         desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
@@ -46,6 +47,36 @@ const courseItems = [
 const CourseRecommended = () => {
     const [dotIndex1, setDotIndex1] = useState(2);
     const [dotIndex2, setDotIndex2] = useState(2);
+    const [courseItems, setCourseItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const data = await coursesAPI.getAll();
+                if (data && data.length > 0) {
+                    const formattedData = data.map(course => ({
+                        id: course._id,
+                        title: course.title,
+                        desc: course.description,
+                        category: course.category,
+                        duration: '1 Month',
+                        instructor: course.instructor?.username || 'Admin',
+                        oldPrice: `$${course.price + 20}`,
+                        newPrice: `$${course.price}`,
+                        image: course.image || 'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=300&h=200&fit=crop'
+                    }));
+                    setCourseItems(formattedData);
+                }
+            } catch (err) {
+                console.error('Failed to fetch courses:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, []);
 
     return (
         <section className="container" style={{ padding: '20px 20px 80px' }}>
@@ -68,6 +99,7 @@ const CourseRecommended = () => {
                     font-size: 0.9rem;
                     cursor: pointer;
                     transition: opacity 0.3s;
+                    text-decoration: none;
                 }
                 .see-all-link:hover {
                     opacity: 0.7;
@@ -196,11 +228,11 @@ const CourseRecommended = () => {
             <div style={{ marginBottom: '60px' }}>
                 <div className="rec-section-header">
                     <h2 className="rec-section-title">Recommended For You</h2>
-                    <span className="see-all-link">See all</span>
+                    <a href="/courses" className="see-all-link">See all</a>
                 </div>
                 <div className="course-cards-grid">
                     {courseItems.map((item, idx) => (
-                        <div key={idx} className="course-item-card" onClick={() => window.location.href = '/course-details'} style={{ cursor: 'pointer' }}>
+                        <div key={idx} className="course-item-card" onClick={() => window.location.href = `/course-details?id=${item.id}`} style={{ cursor: 'pointer' }}>
                             <img src={item.image} alt={item.title} className="course-item-img" />
                             <div className="course-item-body">
                                 <div className="course-item-meta">
@@ -234,11 +266,11 @@ const CourseRecommended = () => {
             <div>
                 <div className="rec-section-header">
                     <h2 className="rec-section-title">Get Choice of your course</h2>
-                    <span className="see-all-link">See all</span>
+                    <a href="/courses" className="see-all-link">See all</a>
                 </div>
                 <div className="course-cards-grid">
                     {courseItems.map((item, idx) => (
-                        <div key={idx} className="course-item-card" onClick={() => window.location.href = '/course-details'} style={{ cursor: 'pointer' }}>
+                        <div key={idx} className="course-item-card" onClick={() => window.location.href = `/course-details?id=${item.id}`} style={{ cursor: 'pointer' }}>
                             <img src={item.image} alt={item.title} className="course-item-img" />
                             <div className="course-item-body">
                                 <div className="course-item-meta">

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
+import { schedulesAPI } from '../../api';
 
 const sidebarItems = [
     { label: 'Dashboard', path: '/admin' },
     { label: 'Courses', path: '/admin/add-courses' },
+    { label: 'Users', path: '/admin/users' },
     { label: 'Schedule', path: '/admin/calendar-create' },
     { label: 'Online Classes', path: '/admin/online-classes' },
     { label: 'Schedules', path: '/admin/schedules' },
@@ -14,7 +16,7 @@ const sidebarItems = [
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const timeSlots = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
 
-const scheduleEvents = [
+const fallbackEvents = [
     { day: 0, startSlot: 1, span: 2, title: 'Adobe XD Basics', color: '#c49696' },
     { day: 1, startSlot: 0, span: 1, title: 'UI Design Lab', color: '#7986cb' },
     { day: 1, startSlot: 3, span: 2, title: 'React Workshop', color: '#4db6ac' },
@@ -28,7 +30,7 @@ const scheduleEvents = [
     { day: 5, startSlot: 3, span: 2, title: 'Code Review', color: '#90a4ae' },
 ];
 
-const todaySchedule = [
+const fallbackTodaySchedule = [
     { time: '9:00 AM', title: 'Adobe XD Basics', instructor: 'Sarah Johnson', room: 'Room 101' },
     { time: '11:00 AM', title: 'React Workshop', instructor: 'Michael Chen', room: 'Lab 3' },
     { time: '2:00 PM', title: 'UI Design Lab', instructor: 'Emily Davis', room: 'Room 205' },
@@ -36,7 +38,98 @@ const todaySchedule = [
 ];
 
 const Schedules = () => {
-    const [activeItem, setActiveItem] = useState(4);
+    const [activeItem, setActiveItem] = useState(5);
+    const [scheduleEvents, setScheduleEvents] = useState([]);
+    const [todaySchedule, setTodaySchedule] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
+    const [formData, setFormData] = useState({
+        title: '',
+        instructor: '',
+        room: '',
+        day: 'Monday',
+        time: '',
+        endTime: '',
+        color: '#c49696'
+    });
+
+    const fetchSchedules = async () => {
+        try {
+            const allSchedules = await schedulesAPI.getAll();
+            if (allSchedules && allSchedules.length > 0) {
+                // Map backend data to grid format
+                const dayMap = { 'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5 };
+                const mapped = allSchedules.map(s => ({
+                    id: s._id,
+                    day: dayMap[s.day] ?? 0,
+                    startSlot: timeSlots.indexOf(s.time) !== -1 ? timeSlots.indexOf(s.time) : 0,
+                    span: 1,
+                    title: s.title,
+                    color: s.color || '#c49696'
+                }));
+                setScheduleEvents(mapped);
+            }
+
+            const todayData = await schedulesAPI.getToday();
+            if (todayData && todayData.length > 0) {
+                setTodaySchedule(todayData.map(s => ({
+                    id: s._id,
+                    time: s.time,
+                    title: s.title,
+                    instructor: s.instructor,
+                    room: s.room
+                })));
+            }
+        } catch (err) {
+            console.error('Failed to fetch schedules:', err);
+        } finally {
+            setPageLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSchedules();
+    }, []);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await schedulesAPI.create(formData);
+            alert('Schedule created successfully!');
+            setShowModal(false);
+            setFormData({
+                title: '',
+                instructor: '',
+                room: '',
+                day: 'Monday',
+                time: '',
+                endTime: '',
+                color: '#c49696'
+            });
+            fetchSchedules();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!id) return;
+        if (!window.confirm('Delete this schedule?')) return;
+        try {
+            await schedulesAPI.delete(id);
+            fetchSchedules();
+        } catch (err) {
+            alert('Delete failed');
+        }
+    };
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f0f2f5' }}>
@@ -173,6 +266,12 @@ const Schedules = () => {
             <div className="sch-main">
                 <div className="sch-header">
                     <h1 className="sch-header-title">Schedules</h1>
+                    <button
+                        onClick={() => setShowModal(true)}
+                        style={{ padding: '10px 20px', background: '#fff', color: '#c49696', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                        + Add Schedule
+                    </button>
                     <span className="sch-header-week">Week of Feb 17 – Feb 22, 2026</span>
                 </div>
 
@@ -195,7 +294,11 @@ const Schedules = () => {
                                         return (
                                             <div key={col} className="sch-grid-cell">
                                                 {event && (
-                                                    <div className="sch-event" style={{ background: event.color }}>
+                                                    <div
+                                                        className="sch-event"
+                                                        style={{ background: event.color }}
+                                                        onClick={() => handleDelete(event.id)}
+                                                    >
                                                         {event.title}
                                                     </div>
                                                 )}
@@ -224,6 +327,43 @@ const Schedules = () => {
                     </div>
                 </div>
             </div>
+
+            {/* MODAL */}
+            {showModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div style={{ background: '#fff', borderRadius: '20px', padding: '35px', width: '100%', maxWidth: '500px' }}>
+                        <h2 style={{ marginBottom: '20px', fontFamily: 'serif' }}>Add New Schedule</h2>
+                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <input name="title" className="sch-modal-input" placeholder="Schedule Title" value={formData.title} onChange={handleChange} required />
+                            <input name="instructor" className="sch-modal-input" placeholder="Instructor" value={formData.instructor} onChange={handleChange} required />
+                            <input name="room" className="sch-modal-input" placeholder="Room/Lab" value={formData.room} onChange={handleChange} />
+
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <select name="day" className="sch-modal-input" value={formData.day} onChange={handleChange} style={{ flex: 1 }}>
+                                    <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                                    <option>Thursday</option><option>Friday</option><option>Saturday</option>
+                                </select>
+                                <select name="time" className="sch-modal-input" value={formData.time} onChange={handleChange} style={{ flex: 1 }}>
+                                    {timeSlots.map(t => <option key={t}>{t}</option>)}
+                                </select>
+                            </div>
+
+                            <input name="color" className="sch-modal-input" placeholder="Color Hex (e.g. #c49696)" value={formData.color} onChange={handleChange} />
+
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                                <button type="button" onClick={() => setShowModal(false)} className="sch-modal-btn cancel">Cancel</button>
+                                <button type="submit" className="sch-modal-btn save" disabled={loading}>{loading ? 'Saving...' : 'Save'}</button>
+                            </div>
+                        </form>
+                    </div>
+                    <style>{`
+                        .sch-modal-input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+                        .sch-modal-btn { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; }
+                        .sch-modal-btn.save { background: #c49696; color: #fff; }
+                        .sch-modal-btn.cancel { background: #f5f5f5; color: #666; }
+                    `}</style>
+                </div>
+            )}
         </div>
     );
 };

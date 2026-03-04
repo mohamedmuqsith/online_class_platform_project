@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "npx -y concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "vite",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",

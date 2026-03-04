@@ -1,17 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const categories = [
     { name: 'Design', icon: '✏️', color: '#e0f7fa' },
     { name: 'Development', icon: '💻', color: '#e0f7fa' },
-    { name: 'Development', icon: '📊', color: '#e0f7fa' },
     { name: 'Business', icon: '💼', color: '#e0f7fa' },
     { name: 'Marketing', icon: '📢', color: '#e0f7fa' },
     { name: 'Photography', icon: '📷', color: '#e0f7fa' },
     { name: 'Acting', icon: '🎬', color: '#e0f7fa' },
-    { name: 'Business', icon: '💼', color: '#e0f7fa' }
 ];
 
 const CourseCategories = () => {
+    const navigate = useNavigate();
     return (
         <section className="container" style={{ padding: '60px 20px' }}>
             <style>{`
@@ -85,13 +85,17 @@ const CourseCategories = () => {
 
             <div className="course-cat-grid">
                 {categories.map((cat, idx) => (
-                    <div key={idx} className="course-cat-card">
+                    <div
+                        key={idx}
+                        className="course-cat-card"
+                        onClick={() => navigate(`/search?category=${encodeURIComponent(cat.name)}`)}
+                    >
                         <div className="cat-icon-wrap">
                             {cat.icon}
                         </div>
                         <div className="cat-name">{cat.name}</div>
                         <div className="cat-desc">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmodadipis­cing elit, sed do eiusmod
+                            Explore courses in our {cat.name} category and advance your career.
                         </div>
                     </div>
                 ))}

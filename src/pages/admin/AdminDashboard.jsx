@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
 import Footer from '../../components/Footer';
+import { adminAPI } from '../../api';
 
-const statCards = [
+const fallbackStats = [
     { label: 'Total Students', value: '2285', icon: '👥', color: '#c49696' },
     { label: 'Courses', value: '150', icon: '📅', color: '#c49696' },
     { label: 'Lectures', value: '54', icon: '🎓', color: '#c49696' },
@@ -13,6 +14,7 @@ const statCards = [
 const sidebarItems = [
     { label: 'Dashboard', path: '/admin' },
     { label: 'Courses', path: '/admin/add-courses' },
+    { label: 'Users', path: '/admin/users' },
     { label: 'Schedule', path: '/admin/calendar-create' },
     { label: 'Online Classes', path: '/admin/online-classes' },
     { label: 'Schedules', path: '/admin/schedules' },
@@ -49,6 +51,29 @@ const perfData = [
 
 const AdminDashboard = () => {
     const [activeItem, setActiveItem] = useState(0);
+    const [statCards, setStatCards] = useState(fallbackStats);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const data = await adminAPI.getStats();
+                setStatCards([
+                    { label: 'Total Students', value: String(data.totalStudents), icon: '👥', color: '#c49696' },
+                    { label: 'Courses', value: String(data.totalCourses), icon: '📅', color: '#c49696' },
+                    { label: 'Lectures', value: String(data.totalClasses), icon: '🎓', color: '#c49696' },
+                    { label: 'Total Revenue', value: data.totalRevenue, icon: '💰', color: '#c49696' },
+                ]);
+            } catch (err) {
+                console.error('Admin stats fetch failed:', err);
+                if (err.message.includes('401') || err.message.includes('No token') || err.message.includes('Not authorized')) {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                }
+                console.log('Using fallback stats');
+            }
+        };
+        fetchStats();
+    }, []);
 
     /* Compute SVG line path for performance chart */
     const perfMaxVal = 80;
@@ -423,7 +448,10 @@ const AdminDashboard = () => {
                     <div className="admin-footer-item">
                         <span>❓</span> <span>help</span>
                     </div>
-                    <div className="admin-footer-item" onClick={() => window.location.href = '/login'}>
+                    <div className="admin-footer-item" onClick={() => {
+                        localStorage.clear();
+                        window.location.href = '/login';
+                    }}>
                         <span>🚪</span> <span>Logout</span>
                     </div>
                 </div>
@@ -571,8 +599,8 @@ const AdminDashboard = () => {
 
                             <div className="admin-perf-right">
                                 <button className="admin-action-btn" onClick={() => window.location.href = '/admin/add-courses'}>Add Courses</button>
-                                <button className="admin-action-btn" onClick={() => alert('Navigate to Add Student')}>Add Student</button>
-                                <button className="admin-action-btn" onClick={() => alert('Navigate to Add Lectures')}>Add Lectures</button>
+                                <button className="admin-action-btn" onClick={() => window.location.href = '/admin/users'}>Manage Users</button>
+                                <button className="admin-action-btn" onClick={() => window.location.href = '/admin/online-classes'}>Live Classes</button>
                             </div>
                         </div>
                     </div>

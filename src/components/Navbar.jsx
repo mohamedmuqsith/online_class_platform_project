@@ -25,9 +25,12 @@ const Navbar = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('eduflex_logged_in');
+        localStorage.removeItem('eduflex_user');
+        localStorage.removeItem('eduflex_token');
+        localStorage.clear(); // Extra safety to clear any other session data
         setIsLoggedIn(false);
         setUserName('');
-        navigate('/login');
+        navigate('/login', { replace: true });
     };
 
     return (

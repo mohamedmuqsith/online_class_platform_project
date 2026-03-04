@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { eventsAPI } from '../api';
 
 const lessons = [
     { title: 'Lesson 01 : Introduction about XD', time: '30 mins', active: true },
@@ -16,14 +18,62 @@ const quizzes = [
     { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
     { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
     { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
-    { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
-    { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
-    { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
-    { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
-    { title: 'Lesson 01 : Introduction about XD', time: '30 mins' },
 ];
 
 const CourseCalendar = () => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState({ username: 'User' });
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDay, setSelectedDay] = useState(null);
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+    const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
+
+    const days = [];
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const totalDays = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month);
+
+    // Padding for first week
+    for (let i = 0; i < firstDay; i++) {
+        days.push(null);
+    }
+    for (let i = 1; i <= totalDays; i++) {
+        days.push(i);
+    }
+
+    const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+    const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+
+    const hasEvent = (day) => {
+        if (!day) return false;
+        return events.some(ev => {
+            const evDate = new Date(ev.startDate);
+            return evDate.getDate() === day && evDate.getMonth() === month && evDate.getFullYear() === year;
+        });
+    };
+
+    useEffect(() => {
+        const fetchAll = async () => {
+            try {
+                const saved = localStorage.getItem('eduflex_user');
+                if (saved) setUser(JSON.parse(saved));
+
+                const data = await eventsAPI.getAll();
+                setEvents(data);
+            } catch (err) {
+                console.error('Failed to fetch calendar events:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAll();
+    }, []);
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
             <style>{`
@@ -198,7 +248,10 @@ const CourseCalendar = () => {
                     transition: all 0.2s;
                 }
                 .cal-day:hover { background: #f5f5f5; }
-                .cal-day.today { background: #c49696; color: #fff; }
+                .cal-day.today { background: #f0f0f0; border: 1px solid #c49696; }
+                .cal-day.selected { border: 2px solid #333; }
+                .cal-day.has-event { background: #ffebee; color: #e53935; }
+                .cal-day.empty { cursor: default; }
 
                 /* Schedule View */
                 .cal-schedule-view {
@@ -278,7 +331,7 @@ const CourseCalendar = () => {
             {/* Sidebar */}
             <aside className="cal-sidebar">
                 <div className="cal-sidebar-header">
-                    <button className="back-btn">←</button>
+                    <button className="back-btn" onClick={() => navigate('/profile')}>←</button>
                     <img src="/logo-black.png" alt="Eduflex" className="cal-logo"
                         onError={(e) => { e.target.src = "https://via.placeholder.com/120x40?text=EDUFLEX"; }} />
                 </div>
@@ -333,35 +386,54 @@ const CourseCalendar = () => {
                     <div className="cal-card">
                         <div className="cal-month-view">
                             <div className="cal-month-header">
-                                <button style={{ background: 'none', border: 'none', cursor: 'pointer' }}>◀</button>
-                                <div className="cal-month-title">September 2021</div>
-                                <button style={{ background: 'none', border: 'none', cursor: 'pointer' }}>▶</button>
+                                <button onClick={prevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>◀</button>
+                                <div className="cal-month-title">{monthNames[month]} {year}</div>
+                                <button onClick={nextMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>▶</button>
                             </div>
                             <div className="cal-grid">
-                                {[1, 2, 3, 4, 5, 6, 7].map(d => <div key={d} className="cal-day">{d}</div>)}
-                                {[8, 9, 10, 11].map(d => <div key={d} className="cal-day">{d}</div>)}
-                                <div className="cal-day today">12</div>
-                                {[13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31].map((d, j) => (
-                                    <div
-                                        key={j}
-                                        className="cal-day"
-                                        onClick={() => window.location.href = '/meetings'}
-                                        style={{ cursor: 'pointer' }}
-                                    >{d}</div>
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                                    <div key={d} style={{ fontWeight: 800, fontSize: '0.75rem', color: '#999', marginBottom: '10px' }}>{d}</div>
                                 ))}
+                                {days.map((d, i) => {
+                                    const isToday = d === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                                    const isSelected = selectedDay === d;
+                                    const eventExists = hasEvent(d);
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`cal-day ${!d ? 'empty' : ''} ${isToday ? 'today' : ''} ${eventExists ? 'has-event' : ''} ${isSelected ? 'selected' : ''}`}
+                                            onClick={() => d && setSelectedDay(d === selectedDay ? null : d)}
+                                        >
+                                            {d}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
                         <div className="cal-schedule-view">
-                            <div className="schedule-header">Sep 12, Monday</div>
+                            <div className="schedule-header">{selectedDay ? `Events for ${monthNames[month]} ${selectedDay}` : 'Monthly Events'}</div>
                             <div className="timeline">
-                                <div className="event-box">Adobe XD Live Class</div>
-                                {[2, 3, 4, 5, 6].map(h => (
-                                    <div key={h} className="time-slot">
-                                        <span className="time-label">{h} PM</span>
-                                        <div className="time-line" />
+                                {events.filter(ev => {
+                                    const evDate = new Date(ev.startDate);
+                                    if (selectedDay) {
+                                        return evDate.getDate() === selectedDay && evDate.getMonth() === month && evDate.getFullYear() === year;
+                                    }
+                                    return evDate.getMonth() === month && evDate.getFullYear() === year;
+                                }).length > 0 ? events.filter(ev => {
+                                    const evDate = new Date(ev.startDate);
+                                    if (selectedDay) {
+                                        return evDate.getDate() === selectedDay && evDate.getMonth() === month && evDate.getFullYear() === year;
+                                    }
+                                    return evDate.getMonth() === month && evDate.getFullYear() === year;
+                                }).map((ev, i) => (
+                                    <div key={i} className="time-slot" style={{ marginBottom: '40px', position: 'relative' }}>
+                                        <span className="time-label">{new Date(ev.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        <div className="event-box" style={{ top: '0', position: 'relative', left: '0' }}>{ev.eventName}</div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <p style={{ fontSize: '0.8rem', color: '#999' }}>{selectedDay ? 'No events for this day.' : 'No events for this month.'}</p>
+                                )}
                             </div>
                         </div>
                     </div>
