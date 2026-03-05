@@ -15,7 +15,7 @@ const sidebarItems = [
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeItem, setActiveItem] = useState(2); // Users is index 2
+  const [activeItem] = useState(2); // Users is index 2
 
   useEffect(() => {
     const fetchUsers = async () => {

@@ -13,7 +13,7 @@ const sidebarItems = [
 ];
 
 const AddCourses = () => {
-    const navigate = useNavigate();
+    const _navigate = useNavigate();
     const [activeItem, setActiveItem] = useState(1);
     const [formData, setFormData] = useState({
         title: '',

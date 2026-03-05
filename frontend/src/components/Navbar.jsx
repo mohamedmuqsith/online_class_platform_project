@@ -12,10 +12,12 @@ const Navbar = () => {
 
     useEffect(() => {
         const loggedIn = localStorage.getItem('eduflex_logged_in') === 'true';
-        setIsLoggedIn(loggedIn);
         if (loggedIn) {
             const user = JSON.parse(localStorage.getItem('eduflex_user') || '{}');
             setUserName(user.username || user.email?.split('@')[0] || 'User');
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
         }
     }, []);
 

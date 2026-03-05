@@ -4,7 +4,7 @@ import newsImg from '../assets/Related Blog.png';
 
 const HomeFeatured = () => {
     const [featured, setFeatured] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, _setLoading] = useState(true);
 
     useEffect(() => {
         const fetchFeatured = async () => {

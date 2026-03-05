@@ -12,6 +12,7 @@ const AuthForm = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -21,8 +22,12 @@ const AuthForm = () => {
 
         /* ---------- basic validation ---------- */
         if (!email.trim()) { setError('Please enter your email.'); return; }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) { setError('Please enter a valid email address.'); return; }
         if (!password.trim()) { setError('Please enter your password.'); return; }
+        if (password.length < 6) { setError('Password must be at least 6 characters long.'); return; }
         if (isSignup && !username.trim()) { setError('Please enter a user name.'); return; }
+        if (isSignup && password !== confirmPassword) { setError('Passwords do not match.'); return; }
 
         setLoading(true);
 
@@ -44,7 +49,7 @@ const AuthForm = () => {
             try {
                 const fullUser = await authAPI.getUser();
                 localStorage.setItem('eduflex_user', JSON.stringify(fullUser));
-            } catch (profileErr) {
+            } catch (_profileErr) {
                 console.warn('Could not fetch full profile, using basic auth data');
             }
 
@@ -205,6 +210,22 @@ const AuthForm = () => {
                                 }}
                             />
                         </div>
+
+                        {/* Confirm Password — only on signup */}
+                        {isSignup && (
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>Confirm Password</label>
+                                <input
+                                    type="password"
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    style={{
+                                        width: '100%', padding: '15px', borderRadius: '25px', border: 'none', outline: 'none'
+                                    }}
+                                />
+                            </div>
+                        )}
 
                         <button
                             type="submit"

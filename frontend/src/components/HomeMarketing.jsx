@@ -4,7 +4,7 @@ import articleImg from '../assets/Related Blog.png';
 
 const HomeMarketing = () => {
     const [articles, setArticles] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, _setLoading] = useState(true);
 
     useEffect(() => {
         const fetchCourses = async () => {

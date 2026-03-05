@@ -16,7 +16,7 @@ const sidebarItems = [
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const timeSlots = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
 
-const fallbackEvents = [
+const _fallbackEvents = [
     { day: 0, startSlot: 1, span: 2, title: 'Adobe XD Basics', color: '#c49696' },
     { day: 1, startSlot: 0, span: 1, title: 'UI Design Lab', color: '#7986cb' },
     { day: 1, startSlot: 3, span: 2, title: 'React Workshop', color: '#4db6ac' },
@@ -30,7 +30,7 @@ const fallbackEvents = [
     { day: 5, startSlot: 3, span: 2, title: 'Code Review', color: '#90a4ae' },
 ];
 
-const fallbackTodaySchedule = [
+const _fallbackTodaySchedule = [
     { time: '9:00 AM', title: 'Adobe XD Basics', instructor: 'Sarah Johnson', room: 'Room 101' },
     { time: '11:00 AM', title: 'React Workshop', instructor: 'Michael Chen', room: 'Lab 3' },
     { time: '2:00 PM', title: 'UI Design Lab', instructor: 'Emily Davis', room: 'Room 205' },
@@ -42,8 +42,8 @@ const Schedules = () => {
     const [scheduleEvents, setScheduleEvents] = useState([]);
     const [todaySchedule, setTodaySchedule] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [pageLoading, setPageLoading] = useState(true);
+    const [_loading, _setLoading] = useState(false);
+    const [_pageLoading, _setPageLoading] = useState(true);
     const [formData, setFormData] = useState({
         title: '',
         instructor: '',
@@ -84,7 +84,7 @@ const Schedules = () => {
         } catch (err) {
             console.error('Failed to fetch schedules:', err);
         } finally {
-            setPageLoading(false);
+            _setPageLoading(false);
         }
     };
 
@@ -126,7 +126,7 @@ const Schedules = () => {
         try {
             await schedulesAPI.delete(id);
             fetchSchedules();
-        } catch (err) {
+        } catch (_err) {
             alert('Delete failed');
         }
     };

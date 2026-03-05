@@ -24,7 +24,7 @@ const CourseCalendar = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({ username: 'User' });
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, _setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState(null);
 

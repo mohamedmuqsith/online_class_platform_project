@@ -7,7 +7,7 @@ import activityImg from '../assets/For_nstructors.png';
 
 const HomeCategories = () => {
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, _setLoading] = useState(true);
 
     const getImage = (name) => {
         const n = name.toLowerCase();

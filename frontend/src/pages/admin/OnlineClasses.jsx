@@ -12,8 +12,8 @@ const sidebarItems = [
     { label: 'Schedules', path: '/admin/schedules' },
 ];
 
-/* Fallback sample class data */
-const fallbackClasses = [
+/* Fallback sample class data - kept as reference but not used */
+const _fallbackClasses = [
     { id: 1, title: 'Adobe XD Auto-Animate', instructor: 'Sarah Johnson', date: 'Feb 20, 2026', time: '10:00 AM', duration: '1.5 hrs', students: 24, status: 'Live' },
     { id: 2, title: 'Figma Advanced Prototyping', instructor: 'Michael Chen', date: 'Feb 20, 2026', time: '2:00 PM', duration: '2 hrs', students: 18, status: 'Scheduled' },
     { id: 3, title: 'React Fundamentals', instructor: 'Emily Davis', date: 'Feb 21, 2026', time: '9:00 AM', duration: '1 hr', students: 35, status: 'Scheduled' },
@@ -26,8 +26,8 @@ const OnlineClasses = () => {
     const [activeItem, setActiveItem] = useState(4);
     const [upcomingClasses, setUpcomingClasses] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [pageLoading, setPageLoading] = useState(true);
+    const [_loading, _setLoading] = useState(false);
+    const [_pageLoading, _setPageLoading] = useState(true);
     const [formData, setFormData] = useState({
         title: '',
         instructor: '',
@@ -45,7 +45,7 @@ const OnlineClasses = () => {
         } catch (err) {
             console.error('Failed to fetch classes:', err);
         } finally {
-            setPageLoading(false);
+            _setPageLoading(false);
         }
     };
 

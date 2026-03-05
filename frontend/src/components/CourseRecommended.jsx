@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { coursesAPI } from '../api';
 
-const fallbackCourseItems = [
+const _fallbackCourseItems = [
     {
         title: 'Top 10 Learning Activities',
         desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',

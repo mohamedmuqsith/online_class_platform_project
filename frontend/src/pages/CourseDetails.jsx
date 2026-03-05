@@ -79,7 +79,7 @@ const CourseDetails = () => {
                         if (user && user.favorites) {
                             setIsFavorite(user.favorites.includes(id));
                         }
-                    } catch (e) { /* Not logged in or error */ }
+                    } catch (_error) { /* Not logged in or error */ }
                 }
             } catch (err) {
                 console.error('Failed to fetch course details:', err);
